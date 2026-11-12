@@ -89,7 +89,7 @@ td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left;vertic
 /* ---------- 1. INGREDIENTES: clave:[nombre, categoría, unidad, pista] ---------- */
 const CAT={V:"🥦 Fruta y verdura",C:"🍗 Carne y pescado",L:"🥛 Huevos y lácteos",D:"🍞 Pan, pasta y legumbres",F:"❄️ Congelados",P:"🧂 Despensa (mira si ya tienes)"};
 const ING={
- pan_int:["Pan integral",CAT.D,"g","1 rebanada ≈ 40 g"],tostadas_int:["Tostadas integrales",CAT.D,"g",""],
+ pan_int:["Pan integral",CAT.D,"g","1 rebanada ≈ 40 g"],tostadas_int:["Tostadas integrales",CAT.D,"g",""],pan_blanco:["Pan blanco",CAT.D,"g","menos fibra que el integral"],pan_centeno:["Pan de centeno o semillas",CAT.D,"g",""],
  avena:["Copos de avena",CAT.D,"g",""],pasta_int:["Pasta integral",CAT.D,"g",""],arroz_int:["Arroz integral",CAT.D,"g",""],
  lentejas:["Lentejas cocidas",CAT.D,"g",""],garbanzos:["Garbanzos cocidos",CAT.D,"g",""],alubias:["Alubias blancas cocidas",CAT.D,"g",""],
  almendras:["Almendras sin sal",CAT.D,"g","un puñadito ≈ 15 g"],nueces:["Nueces",CAT.D,"g","2-3 nueces"],miel:["Miel",CAT.D,"cdta",""],compota:["Compota de manzana sin azúcar",CAT.D,"g","mira que ponga «sin azúcares añadidos»"],
@@ -137,7 +137,7 @@ const SUBS={
  yogur_griego:[["yogur_nat",1,"Un yogur natural."],["kefir",1,"Un kéfir."]],
  queso_fresco:[["requeson",1,"Igual cantidad."],["skyr",1,"Igual cantidad; mucha proteína."]],
  pavo_fiambre:[["jamon_cocido",1,"Elige el extra y bajo en sal."]],
- pan_int:[["tostadas_int",.8,"Un poco menos: las tostadas pesan menos."]],
+ pan_int:[["tostadas_int",.8,"Un poco menos: las tostadas pesan menos."],["pan_centeno",1,"Igual cantidad."],["pan_blanco",1,"Igual cantidad; tiene menos fibra."]],
  pasta_int:[["arroz_int",1,"Igual cantidad."]],
  arroz_int:[["pasta_int",1,"Igual cantidad."]],
  platano:[["pera",1,"Una pera madura."],["manzana",1,"Una manzana."]],
@@ -222,9 +222,10 @@ const DIF=["","Fácil","Normal","Elaborada"];
 
 /* ---------- 4. ESTADO Y GUARDADO ---------- */
 const KEY="mimenu_v2";
-const DEF={settings:{name:"",meals:5,portion:1,people:1,maxDif:2,maxMin:60,excluded:["tomate","avena","leche"],shopDays:[1,4],kiwi:true,times:{desayuno:"07:30",media:"10:30",comida:"13:30",merienda:"16:30",cena:"19:15"},remind:{on:false,lead:10},font:3,contrast:false,pin:"1234"},log:{},weights:[],overrides:{},subs:{},shop:{},adaptLog:[],demo:true,survey:{answers:{},i:0,done:false}};
+const DEF={settings:{name:"",meals:5,portion:1,people:1,maxDif:2,maxMin:60,excluded:["tomate","avena","leche"],shopDays:[1,4],kiwi:true,targets:{leg:[2,3],pes:3},alerts:"todas",blocked:[],times:{desayuno:"07:30",media:"10:30",comida:"13:30",merienda:"16:30",cena:"19:15"},remind:{on:false,lead:10},font:3,contrast:false,pin:"1234"},log:{},weights:[],overrides:{},subs:{},shop:{},adaptLog:[],demo:true,survey:{answers:{},i:0,done:false,props:{}},checkins:[],ci:{i:0,a:{}}};
 let S;
-function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.settings){S=j;S.survey=S.survey||{answers:{},i:0,done:false};S.settings={...DEF.settings,...S.settings,remind:{...DEF.settings.remind,...S.settings.remind},times:{...DEF.settings.times,...S.settings.times}};return}}catch(e){}
+function fixState(){S.survey=S.survey||{answers:{},i:0,done:false};S.survey.props=S.survey.props||{};S.checkins=S.checkins||[];S.ci=S.ci||{i:0,a:{}}}
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.settings){S=j;fixState();S.settings={...DEF.settings,...S.settings,remind:{...DEF.settings.remind,...S.settings.remind},times:{...DEF.settings.times,...S.settings.times}};return}}catch(e){}
  S=JSON.parse(JSON.stringify(DEF));seedDemo();save()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const $=s=>document.querySelector(s);
@@ -245,7 +246,7 @@ const mondayOf=k=>{const d=pd(k);return addD(k,-((d.getDay()+6)%7))};
    Para cada semana se prueban hasta 4.000 combinaciones (siempre las mismas para la misma semana)
    y se elige la primera que cumple las reglas; si ninguna las cumple todas, la que más cumple. */
 const hasExcluded=r=>r.ing.some(([k])=>S.settings.excluded.includes(k));
-function pool(slot){const st=S.settings;let p=R.filter(r=>r.slot===slot&&!hasExcluded(r));let q=p.filter(r=>r.dif<=st.maxDif&&r.min<=st.maxMin);if(!q.length)q=p.filter(r=>r.dif<=st.maxDif);return q.length?q:(p.length?p:R.filter(r=>r.slot===slot))}
+function pool(slot){const st=S.settings;let p=R.filter(r=>r.slot===slot&&!hasExcluded(r)&&!st.blocked.includes(r.id));let q=p.filter(r=>r.dif<=st.maxDif&&r.min<=st.maxMin);if(!q.length)q=p.filter(r=>r.dif<=st.maxDif);return q.length?q:(p.length?p:R.filter(r=>r.slot===slot))}
 function activeSlots(){const m=S.settings.meals;return m>=5?ORDER:m===4?["desayuno","comida","merienda","cena"]:["desayuno","comida","cena"]}
 function recipe(id){return R.find(r=>r.id===id)}
 const LEG=["lentejas","garbanzos","alubias"],PESC=["merluza","bacalao","salmon","caballa","atun","caballa_lata","gambas"],AZUL=["salmon","caballa","atun","caballa_lata"];
@@ -253,7 +254,7 @@ function tagsOf(r){if(r._t)return r._t;const k=r.ing.map(x=>x[0]),t=[];if(k.some
 const eggsOf=r=>{const e=r.ing.find(x=>x[0]==="huevo");return e?e[1]:0};
 /* Reglas semanales. Si no quedan recetas de un tipo (porque se han excluido alimentos), esa regla no se exige. */
 function rules(days){
- const mains=days.flatMap(d=>[d.comida,d.cena].filter(Boolean));
+ const T=S.settings.targets;const mains=days.flatMap(d=>[d.comida,d.cena].filter(Boolean));
  const c=t=>mains.filter(r=>tagsOf(r).includes(t)).length;
  const avail=t=>R.filter(r=>(r.slot==="comida"||r.slot==="cena")&&!hasExcluded(r)&&tagsOf(r).includes(t)).length;
  const availLeg=R.filter(r=>r.slot==="comida"&&!hasExcluded(r)&&tagsOf(r).includes("legumbre")).length;
@@ -263,8 +264,8 @@ function rules(days){
  const repN=dup("comida")+dup("cena"),allowRep=pool("comida").length<7||pool("cena").length<7;
  const clash=days.filter(d=>d.comida&&d.cena&&(["pescado"].some(t=>tagsOf(d.comida).includes(t)&&tagsOf(d.cena).includes(t))||(eggsOf(d.comida)>0&&eggsOf(d.cena)>0))).length;
  return[
- {id:"leg",txt:"Legumbres: 2-3 comidas a la semana",v:leg,ok:leg>=Math.min(2,availLeg)&&leg<=3},
- {id:"pes",txt:"Pescado: al menos 3 veces",v:c("pescado"),ok:c("pescado")>=Math.min(3,avail("pescado"))},
+ {id:"leg",txt:`Legumbres: ${T.leg[0]}-${T.leg[1]} comidas a la semana`,v:leg,ok:leg>=Math.min(T.leg[0],availLeg)&&leg<=T.leg[1]},
+ {id:"pes",txt:`Pescado: al menos ${T.pes} veces`,v:c("pescado"),ok:c("pescado")>=Math.min(T.pes,avail("pescado"))},
  {id:"azul",txt:"Pescado azul: al menos 1 vez",v:c("azul"),ok:c("azul")>=Math.min(1,avail("azul"))},
  {id:"ave",txt:"Pollo o pavo: entre 2 y 4 veces",v:c("ave"),ok:c("ave")>=Math.min(2,avail("ave"))&&c("ave")<=4},
  {id:"hue",txt:"Huevos: máximo 7 a la semana",v:eggs,ok:eggs<=7},
@@ -273,7 +274,7 @@ function rules(days){
 const WK={};
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function hashS(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-function weekPlan(mon){const st=S.settings,key=mon+"|"+st.excluded.join()+"|"+st.maxDif+"|"+st.maxMin;if(WK[key])return WK[key];
+function weekPlan(mon){const st=S.settings,key=mon+"|"+st.excluded.join()+"|"+st.maxDif+"|"+st.maxMin+"|"+JSON.stringify(st.targets)+"|"+st.blocked.join();if(WK[key])return WK[key];
  const rnd=mulberry(hashS(mon));const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
  const P={};ORDER.forEach(x=>P[x]=pool(x));
  const seq=(p,n)=>{const o=[];while(o.length<n){const sh=shuf(p);if(o.length&&sh.length>1&&sh[0]===o[o.length-1])sh.push(sh.shift());o.push(...sh)}return o.slice(0,n)};
@@ -317,7 +318,7 @@ let view="hoy",supOpen=false,shopWeek=0,editWeek=0,subPick="";
 const NAV=[["hoy","🍽️","Hoy"],["semana","📅","Semana"],["compra","🛒","Compra"],["sustituir","🔄","Sustituir"],["mas","⚙️","Más"]];
 function render(){document.documentElement.style.setProperty("--fs",[18,20,22,25,28][S.settings.font]+"px");document.documentElement.dataset.contrast=S.settings.contrast?"high":"";
  $("#nav").innerHTML=NAV.map(([v,i,t])=>`<button class="${view===v?"on":""}" data-act="nav" data-v="${v}" aria-label="${t}"><span class="i">${i}</span>${t}</button>`).join("");
- const f={hoy:vHoy,semana:vSemana,compra:vCompra,sustituir:vSustituir,mas:vMas,encuesta:vEncuesta}[view];$("#app").innerHTML=f();window.scrollTo(0,0)}
+ const f={hoy:vHoy,semana:vSemana,compra:vCompra,sustituir:vSustituir,mas:vMas,encuesta:vEncuesta,checkin:vCheckin}[view];$("#app").innerHTML=f();window.scrollTo(0,0)}
 
 function nextSlot(plan,k){const now=new Date();const hm=pad(now.getHours())+":"+pad(now.getMinutes());const l=dayLog(k);const sl=Object.keys(plan);
  for(const s of sl){if(!l.done[s]&&!l.skip[s]&&S.settings.times[s]>=addMin(hm,-60))return s}return sl.find(s=>!l.done[s]&&!l.skip[s])||null}
@@ -331,6 +332,10 @@ function vHoy(){const k=today(),plan=planFor(k),l=dayLog(k),sl=Object.keys(plan)
  h1+=`<div class="card"><div class="row"><div class="grow"><b>Tu día</b><div class="sub">${done} de ${sl.length} comidas</div></div>${streak()>1?`<span class="tag">🔥 ${streak()} días seguidos</span>`:""}</div><div class="bar" style="margin-top:8px"><i style="width:${done/sl.length*100}%"></i></div><div style="margin-top:8px"><b>${cheer(done,sl.length)}</b></div></div>`;
  if(S.settings.shopDays.includes(new Date().getDay()))h1+=`<div class="card" style="border-color:var(--brand)"><b>🛒 Hoy toca la compra</b><div class="sub">Te la tengo preparada.</div><button class="btn" data-act="nav" data-v="compra">Ver la lista</button></div>`;
  if(!S.survey.done)h1+=`<div class="card" style="border-color:var(--brand)"><b>📋 Cuéntame cómo comes</b><div class="sub">Unas preguntas sencillas para ajustar tu menú a ti. Puedes parar y seguir otro día.</div><button class="btn" data-act="sstart">${S.survey.i>0?"Seguir con las preguntas":"Empezar"}</button></div>`;
+ if(checkinDue())h1+=`<div class="card" style="border-color:var(--brand)"><b>📝 ¿Cómo ha ido tu semana?</b><div class="sub">Dos minutos para ajustar tu menú: lo que no te ha gustado, el hambre, la energía.</div><button class="btn" data-act="ciopen">Contármelo</button></div>`;
+ const hp=S.survey.answers.help||[];
+ if(hp.includes("peso")&&S.weights.length>1){const w=[...S.weights].sort((a,b)=>a.date.localeCompare(b.date)),d=w[w.length-1].kg-w[0].kg;h1+=`<div class="card">⚖️ Desde el principio: <b>${d>0?"+":""}${d.toFixed(1).replace(".",",")} kg</b><div class="sub">Último peso: ${w[w.length-1].kg} kg</div></div>`}
+ if(hp.includes("premio")&&streak()>=5&&new Date().getDay()===0)h1+=`<div class="card hero"><b>🎁 Te has ganado tu capricho de la semana</b></div>`;
  h1+=sl.map(s=>{const r=plan[s],ok=l.done[s],sk=l.skip[s];return `<div class="card meal ${ok?"done":""}"><div class="ico">${SLOTS[s].i}</div><div class="grow" data-act="recipe" data-d="${k}" data-s="${s}"><div class="sub">${SLOTS[s].n} · ${S.settings.times[s]}</div><div class="name">${esc(r.name)}</div>${sk?`<span class="tag">Me lo salté</span>`:""}</div><button class="check ${ok?"on":""}" data-act="done" data-d="${k}" data-s="${s}" aria-label="Marcar ${SLOTS[s].n} como hecho">${ok?"✓":""}</button></div>`}).join("");
  if(S.settings.kiwi)h1+=`<div class="card meal ${l.kiwi?"done":""}"><div class="ico">🥝</div><div class="grow"><div class="name">Tu kiwi de hoy</div><div class="sub">Te ayuda a ir al baño</div></div><button class="check ${l.kiwi?"on":""}" data-act="kiwi" aria-label="Marcar el kiwi">${l.kiwi?"✓":""}</button></div>`;
  h1+=`<div class="card"><b>💧 Agua de hoy</b><div class="sub">Intenta llegar a 6-8 vasos, poco a poco.</div><div class="stepper" style="margin-top:8px"><button data-act="water" data-n="-1" aria-label="Quitar un vaso">−</button><b>${l.water||0} 🥛</b><button data-act="water" data-n="1" aria-label="Añadir un vaso">+</button></div></div>`;
@@ -340,9 +345,10 @@ function vHoy(){const k=today(),plan=planFor(k),l=dayLog(k),sl=Object.keys(plan)
 function streak(){let n=0;const t=today(),need=Math.ceil(activeSlots().length/2);for(let i=0;i<60;i++){const l=S.log[addD(t,-i)];const c=l?Object.keys(l.done).length:0;if(c>=need)n++;else if(i===0)continue;else break}return n}
 function cheer(d,n){if(d===0)return"Empieza por lo que toca ahora. ¡Tú puedes! 💪";if(d>=n)return"¡Día completo! Estás creando un buen hábito 🌟";if(d>=n/2)return"¡Vas muy bien! Ya más de la mitad 👏";return"¡Buen comienzo! Sigue así 😊"}
 /* Recordatorios gratuitos: archivo de calendario (.ics) que el móvil importa; suena aunque la app esté cerrada */
+function remSlots(){const a=S.settings.alerts,act=activeSlots();return a==="dos"?act.filter(s=>s==="comida"||s==="cena"):a==="uno"?["comida"]:act}
 function makeICS(){const st=S.settings,d=today().replace(/-/g,""),mon=mondayOf(today()).replace(/-/g,"");const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Mi Menu//ES//","CALSCALE:GREGORIAN"];
  const ev=(id,title,hm,rule,date)=>L.push("BEGIN:VEVENT","UID:"+id+"@mimenu","DTSTAMP:"+d+"T000000Z","DTSTART:"+date+"T"+hm.replace(":","")+"00","DURATION:PT15M","RRULE:"+rule,"SUMMARY:"+title,"DESCRIPTION:Abre Mi Menu para ver que toca","BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+title,"TRIGGER:-PT"+st.remind.lead+"M","END:VALARM","END:VEVENT");
- activeSlots().forEach(s=>ev("slot-"+s,"Mi Menu: "+SLOTS[s].n,st.times[s],"FREQ=DAILY",d));
+ remSlots().forEach(s=>ev("slot-"+s,"Mi Menu: "+SLOTS[s].n,st.times[s],"FREQ=DAILY",d));
  ev("repaso","Mi Menu: repasa tu dia y marca lo que has comido","21:00","FREQ=DAILY",d);
  ev("peso","Mi Menu: pesate y apunta tu peso","07:15","FREQ=WEEKLY;BYDAY=MO",mon);
  st.shopDays.forEach(d=>ev("compra"+d,"Mi Menu: hoy toca la compra","10:00","FREQ=WEEKLY;BYDAY="+["SU","MO","TU","WE","TH","FR","SA"][d],addD(mondayOf(today()),(d+6)%7).replace(/-/g,"")));
@@ -381,6 +387,7 @@ function vMas(){const st=S.settings;if(supOpen)return vSup();
  return `<h1>Más</h1><div class="card"><b>Tamaño de letra</b><div class="stepper" style="margin-top:8px"><button data-act="font" data-n="-1" aria-label="Letra más pequeña">A−</button><b>${["Pequeña","Normal","Grande","Muy grande","Enorme"][st.font]}</b><button data-act="font" data-n="1" aria-label="Letra más grande">A+</button></div><button class="btn ${st.contrast?"":"alt"}" data-act="contrast">${st.contrast?"✓ Alto contraste activado":"Activar alto contraste"}</button></div>
  <button class="btn" data-act="ics">🔔 Poner recordatorios en el móvil</button>
  <button class="btn alt" data-act="sstart">📋 Cuéntame cómo comes (encuesta)</button>
+ <button class="btn alt" data-act="ciopen">📝 Repaso de mi semana</button>
  <button class="btn alt" data-act="hist">📝 Mi registro de estos días</button>
  <button class="btn alt" data-act="weight">⚖️ Apuntar mi peso</button>
  <button class="btn alt" data-act="help">❓ ¿Cómo funciona esto?</button>
@@ -405,9 +412,11 @@ function vSup(){const st=S.settings,s=stats(),al=alerts();const mon=mondayOf(add
  <b>Personas para las que se cocina</b><div class="stepper"><button data-act="people" data-n="-1">−</button><b>${st.people}</b><button data-act="people" data-n="1">+</button></div>
  <b>Dificultad máxima de recetas</b><div>${[1,2,3].map(n=>`<button class="chip ${st.maxDif===n?"on":""}" data-act="dif" data-n="${n}">${DIF[n]}</button>`).join("")}</div>
  <b>Horarios</b>${ORDER.map(o=>`<label class="sub">${SLOTS[o].i} ${SLOTS[o].n}<input type="time" value="${st.times[o]}" data-act="time" data-s="${o}"></label>`).join("")}</details>`;
+ h+=vSupProps();
  h+=`<details open><summary>⚖️ Equilibrio de la semana</summary>${[0,1].map(w=>{const m=addD(mondayOf(today()),w*7);return `<b>${w?"Próxima semana":"Esta semana"}</b>`+rules(weekDays(m)).map(r=>`<div class="sub">${r.ok?"✅":"⚠️"} ${r.txt} <b>(${r.v})</b></div>`).join("")}).join("")}<div class="sub">Pautas generales de alimentación saludable aplicadas automáticamente; no sustituyen la pauta de su médico o nutricionista. Si un ⚠️ no se puede cumplir, suele ser porque se han excluido demasiados alimentos.</div></details>`;
  h+=`<details><summary>🛒 Compra, kiwi y tiempo de cocina</summary><b>¿Qué días va al súper?</b><div>${[1,2,3,4,5,6,0].map(d=>`<button class="chip ${st.shopDays.includes(d)?"on":""}" data-act="shopday" data-n="${d}">${DIAS[d].slice(0,3)}</button>`).join("")}</div><div class="sub">Cada compra cubre hasta el día anterior a la siguiente.</div><button class="btn ${st.kiwi?"":"alt"}" data-act="kiwitog">${st.kiwi?"✓ Kiwi diario activado":"Activar kiwi diario"}</button><b>Tiempo máximo de cocina</b><div>${[15,30,45,60].map(n=>`<button class="chip ${st.maxMin===n?"on":""}" data-act="maxmin" data-n="${n}">${n===60?"Sin límite":n+" min"}</button>`).join("")}</div></details>`;
  h+=`<details><summary>📋 Encuesta (${S.survey.done?"completada":"sin completar"})</summary>${surveyHTML()}</details>`;
+ h+=`<details><summary>🍽️ Recetas descartadas (${st.blocked.length})</summary>${st.blocked.length?st.blocked.map(id=>`<div class="row" style="padding:6px 0"><div class="grow">${esc((recipe(id)||{}).name||id)}</div><button class="btn alt small" data-act="unblock" data-id="${id}">Recuperar</button></div>`).join(""):`<div class="sub">Ninguna. Aquí aparecen las que ella no quiere repetir.</div>`}</details>`;
  h+=`<details><summary>🚫 Alimentos excluidos</summary><div class="sub">Toca para excluir o permitir. Las recetas con un alimento excluido no se proponen.</div>${[...new Set(R.flatMap(r=>r.ing.map(x=>x[0])).concat(st.excluded))].filter(k=>!STAPLES.has(k)).sort((a,b)=>ING[a][0].localeCompare(ING[b][0])).map(k=>`<button class="chip ${st.excluded.includes(k)?"off":""}" data-act="excl" data-k="${k}">${st.excluded.includes(k)?"🚫 ":""}${esc(ING[k][0])}</button>`).join("")}</details>`;
  h+=`<details><summary>📅 Editar el plan de la semana</summary><div class="row"><button class="btn alt small" data-act="wk" data-n="-1">←</button><button class="btn alt small" data-act="wk" data-n="1">→</button><span class="sub">Semana del ${pd(mon).getDate()}/${pd(mon).getMonth()+1}</span></div>`+
  Array.from({length:7},(_,i)=>{const k=addD(mon,i),plan=planFor(k);return `<div style="border-top:1px solid var(--line);padding:6px 0"><b>${longDate(k)}</b> <span class="sub">${dayKcal(k)} kcal</span>${Object.entries(plan).map(([sl,r])=>`<label class="sub">${SLOTS[sl].n}<select data-act="override" data-d="${k}" data-s="${sl}">${R.filter(x=>x.slot===sl).map(x=>`<option value="${x.id}" ${x.id===r.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select></label>`).join("")}</div>`}).join("")+`<button class="btn danger small" data-act="resetplan">Restablecer plan automático</button></details>`;
@@ -467,17 +476,39 @@ function ansText(q){const a=S.survey.answers[q.id];if(a===undefined)return"";ret
 const toM=t=>{const [h,m]=t.split(":").map(Number);return h*60+m};
 const fromM=n=>{n=Math.round(n/5)*5;return pad(Math.floor(n/60))+":"+pad(n%60)};
 /* Aplica SOLO preferencias seguras (horarios, gustos, días de compra, tiempo de cocina, nº de comidas, kiwi). Es reversible desde el panel. */
-function applySurvey(){const a=S.survey.answers,st=S.settings,prev={times:{...st.times},excluded:[...st.excluded],meals:st.meals,maxMin:st.maxMin,shopDays:[...st.shopDays],kiwi:st.kiwi},ch=[];
+function snap(){const st=S.settings;return JSON.parse(JSON.stringify({times:st.times,excluded:st.excluded,meals:st.meals,maxMin:st.maxMin,maxDif:st.maxDif,portion:st.portion,shopDays:st.shopDays,kiwi:st.kiwi,targets:st.targets,alerts:st.alerts,blocked:st.blocked,subs:S.subs}))}
+function restore(p){const {subs,...rest}=p;Object.assign(S.settings,rest);if(subs)S.subs=subs}
+function logChange(msg,prev){S.adaptLog.push({date:today(),msg,key:"multi",prev})}
+const addEx=(st,keys)=>keys.forEach(k=>{if(!st.excluded.includes(k))st.excluded.push(k)});
+function applySurvey(){const a=S.survey.answers,st=S.settings,prev=snap(),ch=[];
  if(a.breakfast)st.times.desayuno=a.breakfast;if(a.lunch)st.times.comida=a.lunch;if(a.dinner)st.times.cena=a.dinner;
  if(a.breakfast||a.lunch){st.times.media=fromM((toM(st.times.desayuno)+toM(st.times.comida))/2)}
  if(a.lunch||a.dinner){st.times.merienda=fromM((toM(st.times.comida)+toM(st.times.cena))/2)}
  if(a.breakfast||a.lunch||a.dinner)ch.push("horarios ("+activeSlots().map(s=>SLOTS[s].n.split(" ")[0]+" "+st.times[s]).join(", ")+")");
  if(a.meals){st.meals=Number(a.meals);ch.push(a.meals+" comidas al día")}
- if(a.dislike&&a.dislike.length){const ex=new Set(st.excluded);DISLIKE.filter(x=>a.dislike.includes(x[0])).forEach(x=>x[2].forEach(k=>ex.add(k)));st.excluded=[...ex];ch.push("alimentos excluidos")}
+ const dis=[];if(a.dislike&&a.dislike.length)DISLIKE.filter(x=>a.dislike.includes(x[0])).forEach(x=>dis.push(...x[2]));
+ if(a.yogurt==="no")dis.push("yogur_nat","yogur_griego","kefir");if(a.cheese==="no")dis.push("queso_fresco","requeson","skyr","queso_light");if(a.compota==="nada")dis.push("compota");
+ if(dis.length){addEx(st,dis);ch.push("alimentos que no le gustan quitados")}
  if(a.cook){st.maxMin=Number(a.cook);ch.push("cocina máx. "+(a.cook==="60"?"sin límite":a.cook+" min"))}
+ if(a.pain==="mucho"){st.maxDif=1;st.maxMin=Math.min(st.maxMin,30);ch.push("recetas fáciles y rápidas (dolor/cansancio)")}
  if(a.shopdays&&a.shopdays.length){st.shopDays=a.shopdays.map(Number);ch.push("días de compra")}
  if(a.kiwi){st.kiwi=a.kiwi==="si";ch.push(st.kiwi?"kiwi diario":"sin kiwi diario")}
- S.adaptLog.push({date:today(),msg:"Encuesta aplicada: "+(ch.join("; ")||"sin cambios"),key:"multi",prev});S.survey.done=true;save()}
+ if(a.alerts){st.alerts=a.alerts;ch.push("avisos: "+optLabel(SURVEY.find(q=>q.id==="alerts"),a.alerts).toLowerCase())}
+ logChange("Encuesta aplicada: "+(ch.join("; ")||"sin cambios"),prev);S.survey.done=true;save()}
+/* Cambios que afectan a la salud o a la dieta: NO se aplican solos. Aparecen en el panel para que el supervisor acepte o descarte. */
+function proposals(){const a=S.survey.answers,st=S.settings,P=[];const add=(id,txt,fn)=>{if(!S.survey.props[id])P.push({id,txt,fn})};
+ if(a.legum==="0")add("leg0","No le apetecen legumbres: quitarlas del plan. Aportan fibra y proteína, conviene comentarlo con el nutricionista.",()=>addEx(st,LEG));
+ else if(a.legum==="1"&&st.targets.leg[0]!==1)add("leg1","Solo le apetecen legumbres 1 vez por semana: bajar el objetivo de 2-3 a 1.",()=>{st.targets.leg=[1,2]});
+ if(a.fish!==undefined&&Number(a.fish)!==st.targets.pes){const n=Number(a.fish);add("fish","Pescado: ella prefiere "+(n===0?"ninguna vez":n+" veces")+" por semana y el plan pide "+st.targets.pes+". "+(n<2?"Es menos de lo recomendado (2-3 a la semana): coméntalo con el nutricionista.":""),()=>{st.targets.pes=n;if(n===0)addEx(st,PESC)})}
+ if((a.bread==="blanco"||a.bread==="centeno")){const alt=a.bread==="blanco"?"pan_blanco":"pan_centeno";if(S.subs.pan_int!==alt)add("bread","Prefiere pan "+(a.bread==="blanco"?"blanco (tiene menos fibra)":"de centeno o semillas")+": cambiar el pan integral en todas las recetas y en la compra.",()=>{S.subs.pan_int=alt})}
+ if((a.teeth||[]).includes("secos"))add("secos","Le cuesta morder frutos secos: quitar nueces y almendras del plan.",()=>addEx(st,["nueces","almendras"]));
+ const likes=a.fruit||[],FR=[["pera","pera"],["platano","plátano"],["naranja","naranja"],["mandarina","mandarina"],["manzana","manzana"]];
+ const nl=FR.filter(f=>likes.length&&!likes.includes(f[0])&&!st.excluded.includes(f[0])&&R.some(r=>r.ing.some(x=>x[0]===f[0])));
+ if(nl.length)add("fruit","No ha marcado como favoritas: "+nl.map(f=>f[1]).join(", ")+". Quitarlas del plan (quedarán menos recetas para elegir).",()=>addEx(st,nl.map(f=>f[0])));
+ const c=S.checkins[S.checkins.length-1];
+ if(c&&c.a.hunger==="mucha"&&st.portion<1.1)add("ci"+c.date+"h","Esta semana ha tenido mucha hambre: subir las raciones un 10 %. Cambia las calorías: mejor consultarlo con el nutricionista.",()=>{st.portion=Math.round((st.portion+.1)*10)/10});
+ if(c&&(c.a.hard||[]).includes("cocinar")&&st.maxMin>30)add("ci"+c.date+"c","Le ha costado cocinar esta semana: limitar las recetas a 30 minutos.",()=>{st.maxMin=30});
+ return P}
 /* Cosas que NO se aplican solas: se enseñan al supervisor para decidir o comentar con el médico. */
 function surveyFlags(){const a=S.survey.answers,f=[];
  if(a.transit==="mucho"||a.transit==="aveces")f.push("Tránsito: tiene estreñimiento. El plan incluye kiwi, verdura, legumbres y agua; si persiste, comentarlo con su médico.");
@@ -489,15 +520,15 @@ function surveyFlags(){const a=S.survey.answers,f=[];
  if((a.bad||[]).some(x=>x!=="nada"))f.push("Le sientan mal algunos alimentos"+(a.badtext?": "+a.badtext:"")+". Añadirlos a excluidos si se confirman.");
  if((a.teeth||[]).some(x=>x!=="nada"))f.push("Dentadura: le cuesta "+(a.teeth||[]).filter(x=>x!=="nada").map(x=>optLabel(SURVEY.find(q=>q.id==="teeth"),x).toLowerCase()).join(", ")+".");
  if(a.pain==="mucho"||a.pain==="aveces")f.push("El dolor o cansancio le impide cocinar algunos días: cocinar un día para varios o usar recetas de 15 min.");
- if(a.bread&&a.bread!=="integral"&&a.bread!=="noimporta")f.push("Prefiere pan "+optLabel(SURVEY.find(q=>q.id==="bread"),a.bread).toLowerCase()+": el plan usa pan integral; decidir si se cambia.");
- if(a.yogurt==="no")f.push("No le gusta el yogur: excluirlo en 'Alimentos excluidos' (hay varias recetas con yogur).");
  if(a.budget&&a.budget!=="nose")f.push("Presupuesto semanal actual: "+optLabel(SURVEY.find(q=>q.id==="budget"),a.budget)+" (la app todavía no calcula precios).");
+ const c=S.checkins[S.checkins.length-1];
+ if(c){if(c.a.mood==="dejar")f.unshift("⚠️ Tiene ganas de dejarlo: llámala o anímala y valora simplificar el plan.");if(c.a.energy==="baja")f.push("Esta semana ha tenido la energía baja. Si se repite, consultar con su médico.");if(c.a.follow==="poco")f.push("Ha seguido poco el menú esta semana: pregúntale qué le ha costado."+(c.a.free?" Comentario: "+c.a.free:""))}
  return f}
 function surveyText(){return "📋 Respuestas de la encuesta\n\n"+SURVEY.filter(q=>ansText(q)!=="").map(q=>`• ${q.q}\n  → ${ansText(q)}`).join("\n")}
 function surveyHTML(){const a=S.survey.answers,fl=surveyFlags();const rows=SURVEY.filter(q=>ansText(q)!=="").map(q=>`<tr><td>${esc(q.q)}</td><td><b>${esc(ansText(q))}</b></td></tr>`).join("");
  return `<div class="sub">${S.survey.done?"Completada y aplicada al plan.":"Respondidas "+Object.keys(a).length+" de "+SURVEY.length+"."}</div>${fl.length?`<div class="notice"><b>Para revisar contigo o con su médico (no se aplica solo):</b><br>${fl.map(x=>"• "+esc(x)).join("<br>")}</div>`:""}<table>${rows}</table><button class="btn alt" data-act="sapply">Aplicar de nuevo al plan</button><button class="btn alt" data-act="ssend">📤 Enviar las respuestas</button><button class="btn danger" data-act="srestart">Repetir la encuesta desde cero</button>`}
 function vEncuesta(){const sv=S.survey,N=SURVEY.length;
- if(sv.i>=N){const last=S.adaptLog.filter(x=>x.msg.startsWith("Encuesta")).pop();return `<h1>${sv.done?"¡Listo, gracias! 🎉":"¡Has terminado! 🎉"}</h1><div class="card">${sv.done?`<b>Ya he ajustado tu menú.</b><div class="sub">${esc(last?last.msg:"")}</div>`:`<b>Con tus respuestas voy a ajustar tu menú:</b> horarios, comidas que no te gustan y días de compra.`}</div>${sv.done?"":`<button class="btn" data-act="sfinish">✅ Ajustar mi menú</button>`}<button class="btn alt" data-act="ssend">📤 Enviar mis respuestas a mi hijo</button><button class="btn alt" data-act="sprev">← Revisar la última pregunta</button><button class="btn alt" data-act="sgo">Ir a mi menú</button>`}
+ if(sv.i>=N){const last=S.adaptLog.filter(x=>x.msg.startsWith("Encuesta")).pop();return `<h1>${sv.done?"¡Listo, gracias! 🎉":"¡Has terminado! 🎉"}</h1><div class="card">${sv.done?`<b>Ya he ajustado tu menú.</b><div class="sub">${esc(last?last.msg:"")}</div>`:`<b>Con tus respuestas voy a ajustar tu menú:</b> horarios, comidas que no te gustan y días de compra.`}</div>${sv.done&&proposals().length?`<div class="notice">Hay ${proposals().length} cambios más que revisará tu hijo.</div>`:""}${sv.done?"":`<button class="btn" data-act="sfinish">✅ Ajustar mi menú</button>`}<button class="btn alt" data-act="ssend">📤 Enviar mis respuestas a mi hijo</button><button class="btn alt" data-act="sprev">← Revisar la última pregunta</button><button class="btn alt" data-act="sgo">Ir a mi menú</button>`}
  const q=SURVEY[sv.i],a=sv.answers[q.id];
  let h=`<div class="sub">${esc(secOf(sv.i))} · pregunta ${sv.i+1} de ${N}</div><div class="bar"><i style="width:${sv.i/N*100}%"></i></div><h1 style="margin-top:14px">${esc(q.q)}</h1>`;
  if(q.t==="one")h+=q.o.map(([v,l])=>`<button class="btn ${a===v?"":"alt"}" data-act="sans" data-id="${q.id}" data-v="${v}">${a===v?"✓ ":""}${esc(l)}</button>`).join("");
@@ -505,6 +536,29 @@ function vEncuesta(){const sv=S.survey,N=SURVEY.length;
  else if(q.t==="time")h+=`<input type="time" id="sin" value="${esc(a||q.d||"")}"><button class="btn" data-act="snext">Siguiente →</button>`;
  else h+=`<textarea id="sin" rows="3" placeholder="Escribe aquí (o usa el micrófono del teclado)">${esc(a||"")}</textarea><button class="btn" data-act="snext">Siguiente →</button>`;
  return h+`<div style="margin-top:12px"><button class="btn alt small" data-act="sprev">← Atrás</button><button class="btn alt small" data-act="sskip">Saltar</button><button class="btn alt small" data-act="sgo">Seguir otro día</button></div>`}
+
+/* ---------- 11c. REPASO SEMANAL ---------- */
+const CHECKIN=[
+{id:"hunger",t:"one",q:"Esta semana, ¿cómo has llevado el hambre?",o:[["poca","Poca hambre"],["normal","Normal"],["mucha","Mucha hambre"]]},
+{id:"energy",t:"one",q:"¿Y la energía?",o:[["bien","Bien"],["regular","Regular"],["baja","Baja, con cansancio"]]},
+{id:"follow",t:"one",q:"¿Has podido seguir el menú?",o:[["todo","Casi todo"],["mitad","Más o menos la mitad"],["poco","Poco"]]},
+{id:"hard",t:"multi",q:"¿Qué te ha costado más?",o:[["cocinar","Cocinar"],["picar","No picar"],["horarios","Los horarios"],["recetas","Algunas recetas"],["nada","Nada"]]},
+{id:"block",t:"recipes",q:"¿Hay alguna receta que NO quieras volver a comer?"},
+{id:"mood",t:"one",q:"¿Cómo te sientes con el plan?",o:[["motiva","Me motiva"],["igual","Me da igual"],["dejar","Con ganas de dejarlo"]]},
+{id:"free",t:"text",q:"¿Quieres contarme algo más?"}
+];
+function recipeOpts(){const m=new Map(),mon=mondayOf(today());[...weekDays(addD(mon,-7)),...weekDays(mon)].forEach(d=>["desayuno","comida","cena"].forEach(s=>{if(d[s])m.set(d[s].id,d[s].name)}));return[...m]}
+const checkinDue=()=>{if(!S.survey.done)return false;const c=S.checkins[S.checkins.length-1];return!c||c.date<=addD(today(),-7)};
+function vCheckin(){const c=S.ci,N=CHECKIN.length;
+ if(c.i>=N)return `<h1>¡Gracias! 🎉</h1><div class="card"><b>Con esto ajusto tu menú.</b><div class="sub">Las recetas que no quieres repetir desaparecen del plan. Lo demás lo revisa tu hijo.</div></div><button class="btn" data-act="cifinish">✅ Guardar y ajustar</button><button class="btn alt" data-act="ciprev">← Atrás</button>`;
+ const q=CHECKIN[c.i],a=c.a[q.id],o=q.t==="recipes"?recipeOpts():q.o;
+ let h=`<div class="sub">Repaso de la semana · ${c.i+1} de ${N}</div><div class="bar"><i style="width:${c.i/N*100}%"></i></div><h1 style="margin-top:14px">${esc(q.q)}</h1>`;
+ if(q.t==="one")h+=o.map(([v,l])=>`<button class="btn ${a===v?"":"alt"}" data-act="cians" data-id="${q.id}" data-v="${v}">${a===v?"✓ ":""}${esc(l)}</button>`).join("");
+ else if(q.t==="multi"||q.t==="recipes")h+=`<div>${o.map(([v,l])=>`<button class="chip ${(a||[]).includes(v)?"on":""}" data-act="cimulti" data-id="${q.id}" data-v="${v}">${esc(l)}</button>`).join("")}</div><button class="btn" data-act="cinext">Siguiente →</button>`;
+ else h+=`<textarea id="sin" rows="3" placeholder="Escribe aquí (o usa el micrófono del teclado)">${esc(a||"")}</textarea><button class="btn" data-act="cinext">Siguiente →</button>`;
+ return h+`<div style="margin-top:12px"><button class="btn alt small" data-act="ciprev">← Atrás</button><button class="btn alt small" data-act="ciskip">Saltar</button><button class="btn alt small" data-act="sgo">Seguir otro día</button></div>`}
+function vSupProps(){const P=proposals(),c=S.checkins[S.checkins.length-1],fl=surveyFlags().filter(x=>x.startsWith("⚠️"));
+ return `<details open><summary>🔁 Cambios propuestos${P.length?" ("+P.length+")":""}</summary>${fl.map(x=>`<div class="notice">${esc(x)}</div>`).join("")}${P.length?P.map(p=>`<div class="card"><div>${esc(p.txt)}</div><button class="btn small" data-act="pacc" data-id="${p.id}">Aceptar</button><button class="btn alt small" data-act="pno" data-id="${p.id}">Descartar</button></div>`).join(""):`<div class="sub">No hay cambios pendientes. Cuando ella conteste la encuesta o el repaso semanal, aquí aparecerán las propuestas.</div>`}${c?`<div class="sub">Último repaso: ${longDate(c.date)} · hambre ${esc(c.a.hunger||"—")} · energía ${esc(c.a.energy||"—")} · ánimo ${esc(c.a.mood||"—")}</div>`:""}<div class="sub">Lo que ella dice que no le gusta se aplica solo (y se puede deshacer). Lo que afecta a la salud lo decides tú.</div></details>`}
 
 /* ---------- 12. RECETA Y HOJAS ---------- */
 function openRecipe(k,s){const plan=planFor(k),r=plan[s];if(!r)return;const l=dayLog(k);
@@ -550,7 +604,16 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(
  excl(){const x=S.settings.excluded,i=x.indexOf(D.k);i<0?x.push(D.k):x.splice(i,1);save();render()},
  resetplan(){S.overrides={};save();render()},
  remind(){S.settings.remind.on=!S.settings.remind.on;if(S.settings.remind.on&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission();save();render()},
- undo(){const a=S.adaptLog[Number(D.i)];if(!a||a.key==="none")return;if(a.key==="multi")Object.assign(S.settings,a.prev);else S.settings[a.key]=a.prev;a.key="none";a.msg+=" (deshecho)";save();render()},
+ undo(){const a=S.adaptLog[Number(D.i)];if(!a||a.key==="none")return;if(a.key==="multi")restore(a.prev);else S.settings[a.key]=a.prev;a.key="none";a.msg+=" (deshecho)";save();render()},
+ ciopen(){close();view="checkin";supOpen=false;if(S.ci.i>=CHECKIN.length)S.ci={i:0,a:{}};render()},
+ cians(){S.ci.a[D.id]=D.v;S.ci.i++;save();render()},
+ cimulti(){const arr=S.ci.a[D.id]=S.ci.a[D.id]||[],i=arr.indexOf(D.v);i<0?arr.push(D.v):arr.splice(i,1);save();const y=scrollY;render();scrollTo(0,y)},
+ cinext(){const q=CHECKIN[S.ci.i],el=$("#sin");if(el&&q.t==="text")S.ci.a[q.id]=el.value;S.ci.i++;save();render()},
+ ciprev(){S.ci.i=Math.max(0,S.ci.i-1);save();render()},ciskip(){S.ci.i++;save();render()},
+ cifinish(){const a=S.ci.a,st=S.settings,prev=snap();S.checkins.push({date:today(),a});const bl=a.block||[];if(bl.length){st.blocked=[...new Set([...st.blocked,...bl])];logChange("Recetas que no quiere repetir: "+bl.map(id=>(recipe(id)||{}).name).join(", "),prev)}S.ci={i:0,a:{}};save();view="hoy";render();toast("¡Gracias! Menú ajustado ✓")},
+ pacc(){const p=proposals().find(x=>x.id===D.id);if(p){const prev=snap();p.fn();S.survey.props[p.id]="ok";logChange("Aceptado: "+p.txt.slice(0,90),prev);save();render()}},
+ pno(){S.survey.props[D.id]="no";save();render()},
+ unblock(){const prev=snap();S.settings.blocked=S.settings.blocked.filter(x=>x!==D.id);logChange("Receta recuperada",prev);save();render()},
  kiwi(){const l=dayLog(today());l.kiwi=!l.kiwi;save();render()},kiwitog(){S.settings.kiwi=!S.settings.kiwi;save();render()},
  shopday(){const x=S.settings.shopDays,n=Number(D.n),i=x.indexOf(n);i<0?x.push(n):x.splice(i,1);save();render()},
  maxmin(){S.settings.maxMin=Number(D.n);save();render()},
@@ -573,11 +636,11 @@ document.addEventListener("change",e=>{const t=e.target,a=t.dataset.act;if(!a)re
  else if(a==="lead"){S.settings.remind.lead=Number(t.value);save()}
  else if(a==="name"){S.settings.name=t.value;save()}
  else if(a==="pin"){if(t.value.length>=4){S.settings.pin=t.value;save()}}
- else if(a==="import"){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(j.settings){S=j;S.survey=S.survey||{answers:{},i:0,done:false};S.settings={...DEF.settings,...S.settings};save();render()}}catch(_){toast("Archivo no válido")}};r.readAsText(f)}});
+ else if(a==="import"){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(j.settings){S=j;S.settings={...DEF.settings,...S.settings};fixState();save();render()}}catch(_){toast("Archivo no válido")}};r.readAsText(f)}});
 
 /* ---------- 14. RECORDATORIOS (con la app abierta) ---------- */
 function checkReminders(){if(!S.settings.remind.on)return;const now=new Date(),k=today();const plan=planFor(k);
- for(const s of Object.keys(plan)){const t=addMin(S.settings.times[s],-S.settings.remind.lead);const hm=pad(now.getHours())+":"+pad(now.getMinutes());const id="r"+k+s;
+ for(const s of remSlots()){const t=addMin(S.settings.times[s],-S.settings.remind.lead);const hm=pad(now.getHours())+":"+pad(now.getMinutes());const id="r"+k+s;
   if(hm===t&&!sessionStorage.getItem(id)){sessionStorage.setItem(id,1);const msg=`${SLOTS[s].i} ${SLOTS[s].n}: ${plan[s].name}`;toast(msg,()=>openRecipe(k,s));try{navigator.vibrate&&navigator.vibrate([200,100,200]);if("Notification"in window&&Notification.permission==="granted")new Notification("Mi Menú",{body:msg})}catch(_){}}}}
 setInterval(checkReminders,20000);
 
