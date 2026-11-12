@@ -91,8 +91,8 @@ const CAT={V:"🥦 Fruta y verdura",C:"🍗 Carne y pescado",L:"🥛 Huevos y l�
 const ING={
  pan_int:["Pan integral",CAT.D,"g","1 rebanada ≈ 40 g"],tostadas_int:["Tostadas integrales",CAT.D,"g",""],
  avena:["Copos de avena",CAT.D,"g",""],pasta_int:["Pasta integral",CAT.D,"g",""],arroz_int:["Arroz integral",CAT.D,"g",""],
- lentejas:["Lentejas cocidas (bote)",CAT.D,"g",""],garbanzos:["Garbanzos cocidos (bote)",CAT.D,"g",""],alubias:["Alubias blancas cocidas (bote)",CAT.D,"g",""],
- almendras:["Almendras sin sal",CAT.D,"g","un puñadito ≈ 15 g"],nueces:["Nueces",CAT.D,"g","2-3 nueces"],miel:["Miel",CAT.D,"cdta",""],
+ lentejas:["Lentejas cocidas",CAT.D,"g",""],garbanzos:["Garbanzos cocidos",CAT.D,"g",""],alubias:["Alubias blancas cocidas",CAT.D,"g",""],
+ almendras:["Almendras sin sal",CAT.D,"g","un puñadito ≈ 15 g"],nueces:["Nueces",CAT.D,"g","2-3 nueces"],miel:["Miel",CAT.D,"cdta",""],compota:["Compota de manzana sin azúcar",CAT.D,"g","mira que ponga «sin azúcares añadidos»"],
  atun:["Atún al natural (lata)",CAT.D,"lata",""],caballa_lata:["Caballa al natural (lata)",CAT.D,"lata",""],
  pavo_fiambre:["Pavo en lonchas, bajo en sal",CAT.C,"g","3-4 lonchas"],jamon_cocido:["Jamón cocido extra, bajo en sal",CAT.C,"g",""],
  pechuga_pollo:["Pechuga de pollo",CAT.C,"g","un filete mediano ≈ 150 g"],pavo_filete:["Filete de pavo",CAT.C,"g",""],
@@ -109,6 +109,8 @@ const ING={
  aove:["Aceite de oliva virgen extra",CAT.P,"cda",""],ajo:["Ajo",CAT.P,"ud",""],pimenton:["Pimentón dulce",CAT.P,"cdta",""],comino:["Comino",CAT.P,"cdta",""],canela:["Canela",CAT.P,"cdta",""],romero:["Romero",CAT.P,"cdta",""]
 };
 const STAPLES=new Set(["aove","ajo","pimenton","comino","canela","romero"]);
+/* peso aproximado de cada unidad, para que la lista diga también los gramos */
+const GR={zanahoria:100,kiwi:80,pera:170,platano:120,mandarina:80,naranja:200,manzana:170,limon:100,huevo:60,yogur_nat:125,yogur_griego:150,kefir:125,queso_light:17,atun:80,caballa_lata:90,tomate:150};
 
 /* ---------- 2. SUSTITUCIONES: ingrediente -> [alternativa, factor, nota] ---------- */
 const SUBS={
@@ -150,22 +152,24 @@ const SUBS={
    id, slot, nombre, min, dificultad(1 fácil,2 normal,3 elaborada), kcal, prot(g),
    ing:[[clave,cantidad]], steps:[...], tip (Thermomix o truco), dent:true si hay que cuidar la dentadura */
 const R=[
-/* DESAYUNOS */
-{id:"d1",slot:"desayuno",name:"Tostada de pavo con aceite y kiwi",min:5,dif:1,kcal:310,prot:21,ing:[["pan_int",50],["aove",1],["pavo_fiambre",40],["kiwi",1],["leche",200]],
- steps:["Tuesta el pan.","Échale un hilo de aceite de oliva y pon encima el pavo.","Calienta la leche y mézclala con tu café o infusión.","Pela el kiwi y tómalo aparte."]},
-{id:"d2",slot:"desayuno",name:"Yogur griego con avena y plátano",min:5,dif:1,kcal:290,prot:20,ing:[["yogur_griego",1],["avena",30],["platano",.5],["canela",1]],
- steps:["Pon el yogur en un bol.","Añade la avena y mézclala.","Corta el plátano en rodajas y ponlo encima.","Espolvorea un poco de canela."],tip:"La avena queda más blanda si lo preparas la noche anterior y lo dejas en la nevera."},
-{id:"d3",slot:"desayuno",name:"Tortilla francesa con tostada y naranja",min:10,dif:1,kcal:330,prot:22,ing:[["huevo",2],["pan_int",40],["aove",.5],["naranja",1]],
+/* DESAYUNOS (sin avena ni leche, con pan; más contundentes) */
+{id:"d1",slot:"desayuno",name:"Tostadas de pavo con aceite",min:5,dif:1,kcal:350,prot:22,ing:[["pan_int",80],["aove",1],["pavo_fiambre",50]],
+ steps:["Tuesta el pan.","Échale un hilo de aceite de oliva por encima.","Pon encima las lonchas de pavo.","Acompaña con tu café solo o infusión."]},
+{id:"d2",slot:"desayuno",name:"Tostadas con queso fresco y compota de manzana",min:5,dif:1,kcal:340,prot:20,ing:[["pan_int",80],["queso_fresco",80],["compota",100]],
+ steps:["Tuesta el pan.","Unta el queso fresco por encima.","Toma la compota en un cuenco aparte.","Acompaña con tu café o infusión."]},
+{id:"d3",slot:"desayuno",name:"Tortilla francesa con tostadas y naranja",min:10,dif:1,kcal:400,prot:25,ing:[["huevo",2],["pan_int",60],["aove",.5],["naranja",1]],
  steps:["Bate los huevos en un plato. No hace falta sal.","Pon media cucharada de aceite en la sartén y haz la tortilla 1-2 minutos por cada lado.","Tuesta el pan y acompaña.","Toma la naranja en gajos."]},
-{id:"d4",slot:"desayuno",name:"Gachas de avena con manzana",min:10,dif:1,kcal:290,prot:15,ing:[["avena",40],["leche",200],["manzana",.5],["canela",1]],
- steps:["Pon la avena y la leche en un cazo a fuego medio.","Remueve 5 minutos hasta que espese.","Ralla la media manzana por encima (así es blanda para la dentadura).","Espolvorea canela."],tip:"Thermomix: avena y leche, 7 min · 90º · vel 2.",dent:true},
-{id:"d5",slot:"desayuno",name:"Tostada con queso fresco y miel",min:5,dif:1,kcal:300,prot:20,ing:[["pan_int",50],["queso_fresco",80],["miel",1],["pera",1],["leche",150]],
- steps:["Tuesta el pan.","Unta el queso fresco por encima.","Añade la cucharadita de miel.","Acompaña con la pera y un café con leche."]},
+{id:"d4",slot:"desayuno",name:"Bocadillo pequeño de pavo y queso fresco",min:5,dif:1,kcal:360,prot:26,ing:[["pan_int",80],["pavo_fiambre",40],["queso_fresco",40],["aove",.5]],
+ steps:["Abre el pan por la mitad y tuéstalo si quieres.","Unta el queso fresco y échale un hilo de aceite.","Añade el pavo y cierra el bocadillo.","Acompaña con tu café o infusión."]},
+{id:"d5",slot:"desayuno",name:"Huevo a la plancha con tostadas y compota",min:10,dif:1,kcal:340,prot:17,ing:[["huevo",1],["pan_int",70],["aove",.5],["compota",100]],
+ steps:["Pon media cucharada de aceite en la sartén y haz el huevo a la plancha 2-3 minutos.","Tuesta el pan.","Sirve el huevo sobre la tostada.","Toma la compota de postre."]},
+{id:"d6",slot:"desayuno",name:"Yogur griego con compota y tostada",min:5,dif:1,kcal:330,prot:19,ing:[["yogur_griego",1],["compota",100],["pan_int",60]],
+ steps:["Pon el yogur en un cuenco y añade la compota.","Tuesta el pan.","Tómala con un hilo de aceite o sola."]},
 /* MEDIA MAÑANA */
 {id:"m1",slot:"media",name:"Yogur con pera",min:3,dif:1,kcal:150,prot:7,ing:[["yogur_nat",1],["pera",1]],steps:["Corta la pera en trocitos pequeños.","Mézclala con el yogur."],dent:true},
-{id:"m2",slot:"media",name:"Queso fresco con kiwi",min:3,dif:1,kcal:140,prot:13,ing:[["queso_fresco",100],["kiwi",1]],steps:["Pon el queso en un cuenco.","Pela el kiwi y córtalo en trocitos por encima."]},
+{id:"m2",slot:"media",name:"Queso fresco con compota",min:3,dif:1,kcal:130,prot:12,ing:[["queso_fresco",80],["compota",80]],steps:["Pon el queso en un cuenco.","Añade la compota por encima."]},
 {id:"m3",slot:"media",name:"Mandarinas y almendras",min:2,dif:1,kcal:150,prot:4,ing:[["mandarina",2],["almendras",15]],steps:["Pela las mandarinas.","Toma las almendras con ellas, despacio."],tip:"Si las almendras te molestan con la dentadura, pícalas en trocitos o cámbialas por 2 nueces.",dent:true},
-{id:"m4",slot:"media",name:"Batido de leche y plátano",min:3,dif:1,kcal:150,prot:8,ing:[["leche",200],["platano",.5],["canela",1]],steps:["Pon todo en el vaso de la batidora.","Bate 30 segundos y bebe."],tip:"Thermomix: 20 seg · vel 7."},
+{id:"m4",slot:"media",name:"Compota de manzana con nueces",min:3,dif:1,kcal:140,prot:3,ing:[["compota",100],["nueces",15]],steps:["Pon la compota en un cuenco.","Añade las nueces troceadas."],dent:true},
 /* COMIDAS */
 {id:"c1",slot:"comida",name:"Lentejas estofadas con verduras y huevo",min:25,dif:1,kcal:470,prot:30,ing:[["lentejas",200],["zanahoria",1],["cebolla",40],["pimiento",50],["aove",1],["pimenton",1],["ajo",1],["huevo",1],["mandarina",1]],
  steps:["Pica pequeño la cebolla, el pimiento y la zanahoria. Pon el huevo a cocer 10 minutos en otro cazo.","Sofríe las verduras con una cucharada de aceite y el ajo, 5 minutos.","Aparta del fuego, añade el pimentón y remueve unos segundos.","Añade las lentejas escurridas y un vaso de agua. Cocina 10 minutos.","Sirve con el huevo cocido troceado. De postre, la mandarina."],tip:"Thermomix: trocea verduras 5 seg · vel 5; sofríe 7 min · 120º · vel 1; añade lentejas y agua, 10 min · 100º · vel cuchara."},
@@ -187,7 +191,7 @@ const R=[
 {id:"t1",slot:"merienda",name:"Yogur con frutos rojos",min:3,dif:1,kcal:130,prot:7,ing:[["yogur_nat",1],["frutos_rojos",80]],steps:["Saca los frutos rojos del congelador 10 minutos antes.","Mézclalos con el yogur."]},
 {id:"t2",slot:"merienda",name:"Tostada con queso fresco",min:3,dif:1,kcal:140,prot:11,ing:[["pan_int",30],["queso_fresco",50]],steps:["Tuesta el pan.","Unta el queso fresco."]},
 {id:"t3",slot:"merienda",name:"Pera con nueces",min:3,dif:1,kcal:160,prot:3,ing:[["pera",1],["nueces",15]],steps:["Pela y corta la pera.","Toma las nueces troceadas aparte o por encima."],dent:true},
-{id:"t4",slot:"merienda",name:"Yogur con avena y canela",min:3,dif:1,kcal:140,prot:8,ing:[["yogur_nat",1],["avena",20],["canela",1]],steps:["Pon el yogur en un cuenco.","Añade la avena y la canela y mezcla."]},
+{id:"t4",slot:"merienda",name:"Yogur con compota de manzana",min:3,dif:1,kcal:130,prot:6,ing:[["yogur_nat",1],["compota",80]],steps:["Pon el yogur en un cuenco.","Añade la compota y mezcla."]},
 /* CENAS */
 {id:"s1",slot:"cena",name:"Crema de calabacín con tortilla francesa",min:25,dif:1,kcal:350,prot:21,ing:[["calabacin",250],["patata",50],["cebolla",40],["queso_light",1],["huevo",2],["aove",1]],
  steps:["Cuece el calabacín, la patata y la cebolla troceados 15 minutos en poca agua.","Tritura con el queso hasta que quede fina.","Haz una tortilla francesa con los 2 huevos."],tip:"Thermomix: verduras 15 min · 100º · vel 1; después tritura 1 min · vel 8."},
@@ -202,7 +206,13 @@ const R=[
 {id:"s6",slot:"cena",name:"Sopa de verduras con huevo y pavo",min:25,dif:1,kcal:310,prot:25,ing:[["puerro",60],["zanahoria",1],["judias",100],["huevo",1],["pavo_fiambre",40],["pan_int",30]],
  steps:["Cuece el puerro, la zanahoria y las judías troceados 15 minutos en un litro de agua.","Añade el huevo cocido troceado y el pavo en tiras.","Sirve caliente con el pan tostado."]},
 {id:"s7",slot:"cena",name:"Merluza a la plancha con ensalada",min:15,dif:1,kcal:320,prot:33,ing:[["merluza",160],["lechuga",100],["zanahoria",1],["limon",.5],["aove",1],["pan_int",30]],
- steps:["Haz la merluza a la plancha 3-4 minutos por lado.","Prepara una ensalada de lechuga y zanahoria rallada.","Aliña con aceite y limón.","Acompaña con el pan."]}
+ steps:["Haz la merluza a la plancha 3-4 minutos por lado.","Prepara una ensalada de lechuga y zanahoria rallada.","Aliña con aceite y limón.","Acompaña con el pan."]},
+{id:"s8",slot:"cena",name:"Pechuga de pollo a la plancha con ensalada",min:15,dif:1,kcal:330,prot:36,ing:[["pechuga_pollo",130],["lechuga",100],["zanahoria",1],["pan_int",30],["aove",1],["limon",.5]],
+ steps:["Corta la pechuga en filetes finos y hazla a la plancha 3 minutos por lado.","Prepara la ensalada de lechuga y zanahoria rallada.","Aliña con aceite y limón.","Acompaña con el pan."]},
+{id:"s9",slot:"cena",name:"Bacalao al horno con patata y pimiento",min:30,dif:1,kcal:340,prot:30,ing:[["bacalao",150],["patata",100],["pimiento",60],["cebolla",40],["aove",1]],
+ steps:["Enciende el horno a 190º.","Corta la patata en rodajas finas, y el pimiento y la cebolla en tiras. Ponlas en una bandeja con el aceite.","Hornea 15 minutos y pon el bacalao encima.","Hornea 10-12 minutos más."],tip:"Si el bacalao es desalado, no añadas sal."},
+{id:"s10",slot:"cena",name:"Crema de calabaza con tostada de pavo y queso",min:25,dif:1,kcal:320,prot:24,ing:[["calabaza",250],["cebolla",40],["queso_fresco",60],["pan_int",40],["pavo_fiambre",40],["aove",1]],
+ steps:["Cuece la calabaza y la cebolla troceadas 15 minutos en poca agua.","Tritura con el queso fresco hasta que quede fina.","Tuesta el pan y ponle el pavo."],tip:"Thermomix: verduras 15 min · 100º · vel 1; tritura 1 min · vel 8."}
 ];
 const SLOTS={desayuno:{n:"Desayuno",i:"☕"},media:{n:"Media mañana",i:"🍎"},comida:{n:"Comida",i:"🍲"},merienda:{n:"Merienda",i:"🥛"},cena:{n:"Cena",i:"🌙"}};
 const ORDER=["desayuno","media","comida","merienda","cena"];
@@ -211,10 +221,10 @@ const INC=["Dolor de rodilla o cadera","Mareo","No me sentó bien","Ganas de pic
 const DIF=["","Fácil","Normal","Elaborada"];
 
 /* ---------- 4. ESTADO Y GUARDADO ---------- */
-const KEY="mimenu_v1";
-const DEF={settings:{name:"",meals:5,portion:1,people:1,maxDif:2,excluded:["tomate"],times:{desayuno:"07:30",media:"10:30",comida:"13:45",merienda:"16:45",cena:"19:45"},remind:{on:false,lead:10},font:3,contrast:false,pin:"1234"},log:{},weights:[],overrides:{},subs:{},shop:{},adaptLog:[],demo:true};
+const KEY="mimenu_v2";
+const DEF={settings:{name:"",meals:5,portion:1,people:1,maxDif:2,maxMin:60,excluded:["tomate","avena","leche"],shopDays:[1,4],kiwi:true,times:{desayuno:"07:30",media:"10:30",comida:"13:30",merienda:"16:30",cena:"19:15"},remind:{on:false,lead:10},font:3,contrast:false,pin:"1234"},log:{},weights:[],overrides:{},subs:{},shop:{},adaptLog:[],demo:true,survey:{answers:{},i:0,done:false}};
 let S;
-function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.settings){S=j;S.settings={...DEF.settings,...S.settings,remind:{...DEF.settings.remind,...S.settings.remind},times:{...DEF.settings.times,...S.settings.times}};return}}catch(e){}
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.settings){S=j;S.survey=S.survey||{answers:{},i:0,done:false};S.settings={...DEF.settings,...S.settings,remind:{...DEF.settings.remind,...S.settings.remind},times:{...DEF.settings.times,...S.settings.times}};return}}catch(e){}
  S=JSON.parse(JSON.stringify(DEF));seedDemo();save()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const $=s=>document.querySelector(s);
@@ -231,13 +241,49 @@ const longDate=k=>{const d=pd(k);return `${DIAS[d.getDay()]} ${d.getDate()} de $
 const today=()=>dk(new Date());
 const mondayOf=k=>{const d=pd(k);return addD(k,-((d.getDay()+6)%7))};
 
-/* ---------- 6. PLAN SEMANAL (automático, determinista y editable) ---------- */
+/* ---------- 6. PLAN SEMANAL: reglas de equilibrio + rotación con semilla ----------
+   Para cada semana se prueban hasta 4.000 combinaciones (siempre las mismas para la misma semana)
+   y se elige la primera que cumple las reglas; si ninguna las cumple todas, la que más cumple. */
 const hasExcluded=r=>r.ing.some(([k])=>S.settings.excluded.includes(k));
-function pool(slot){let p=R.filter(r=>r.slot===slot&&!hasExcluded(r));let q=p.filter(r=>r.dif<=S.settings.maxDif);return q.length?q:(p.length?p:R.filter(r=>r.slot===slot))}
+function pool(slot){const st=S.settings;let p=R.filter(r=>r.slot===slot&&!hasExcluded(r));let q=p.filter(r=>r.dif<=st.maxDif&&r.min<=st.maxMin);if(!q.length)q=p.filter(r=>r.dif<=st.maxDif);return q.length?q:(p.length?p:R.filter(r=>r.slot===slot))}
 function activeSlots(){const m=S.settings.meals;return m>=5?ORDER:m===4?["desayuno","comida","merienda","cena"]:["desayuno","comida","cena"]}
 function recipe(id){return R.find(r=>r.id===id)}
-function planFor(k){const d=pd(k);const dow=(d.getDay()+6)%7;const wk=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5-dow)/7);const out={};
- for(const s of activeSlots()){const ov=S.overrides[k]&&S.overrides[k][s];if(ov&&recipe(ov)){out[s]=recipe(ov);continue}const p=pool(s);out[s]=p[(wk*3+dow+OFF[s])%p.length]}return out}
+const LEG=["lentejas","garbanzos","alubias"],PESC=["merluza","bacalao","salmon","caballa","atun","caballa_lata","gambas"],AZUL=["salmon","caballa","atun","caballa_lata"];
+function tagsOf(r){if(r._t)return r._t;const k=r.ing.map(x=>x[0]),t=[];if(k.some(x=>LEG.includes(x)))t.push("legumbre");if(k.some(x=>PESC.includes(x)))t.push("pescado");if(k.some(x=>AZUL.includes(x)))t.push("azul");if(k.some(x=>x==="pechuga_pollo"||x==="pavo_filete"))t.push("ave");return r._t=t}
+const eggsOf=r=>{const e=r.ing.find(x=>x[0]==="huevo");return e?e[1]:0};
+/* Reglas semanales. Si no quedan recetas de un tipo (porque se han excluido alimentos), esa regla no se exige. */
+function rules(days){
+ const mains=days.flatMap(d=>[d.comida,d.cena].filter(Boolean));
+ const c=t=>mains.filter(r=>tagsOf(r).includes(t)).length;
+ const avail=t=>R.filter(r=>(r.slot==="comida"||r.slot==="cena")&&!hasExcluded(r)&&tagsOf(r).includes(t)).length;
+ const availLeg=R.filter(r=>r.slot==="comida"&&!hasExcluded(r)&&tagsOf(r).includes("legumbre")).length;
+ const leg=days.filter(d=>d.comida&&tagsOf(d.comida).includes("legumbre")).length;
+ const eggs=days.reduce((a,d)=>a+Object.values(d).reduce((b,r)=>b+eggsOf(r),0),0);
+ const dup=s=>{const ids=days.map(d=>d[s]&&d[s].id).filter(Boolean);return ids.length-new Set(ids).size};
+ const repN=dup("comida")+dup("cena"),allowRep=pool("comida").length<7||pool("cena").length<7;
+ const clash=days.filter(d=>d.comida&&d.cena&&(["pescado"].some(t=>tagsOf(d.comida).includes(t)&&tagsOf(d.cena).includes(t))||(eggsOf(d.comida)>0&&eggsOf(d.cena)>0))).length;
+ return[
+ {id:"leg",txt:"Legumbres: 2-3 comidas a la semana",v:leg,ok:leg>=Math.min(2,availLeg)&&leg<=3},
+ {id:"pes",txt:"Pescado: al menos 3 veces",v:c("pescado"),ok:c("pescado")>=Math.min(3,avail("pescado"))},
+ {id:"azul",txt:"Pescado azul: al menos 1 vez",v:c("azul"),ok:c("azul")>=Math.min(1,avail("azul"))},
+ {id:"ave",txt:"Pollo o pavo: entre 2 y 4 veces",v:c("ave"),ok:c("ave")>=Math.min(2,avail("ave"))&&c("ave")<=4},
+ {id:"hue",txt:"Huevos: máximo 7 a la semana",v:eggs,ok:eggs<=7},
+ {id:"rep",txt:"Sin repetir comida ni cena en la semana",v:repN,ok:repN===0||allowRep},
+ {id:"mix",txt:"Pescado o huevo no en comida y cena del mismo día",v:clash,ok:clash===0}]}
+const WK={};
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hashS(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function weekPlan(mon){const st=S.settings,key=mon+"|"+st.excluded.join()+"|"+st.maxDif+"|"+st.maxMin;if(WK[key])return WK[key];
+ const rnd=mulberry(hashS(mon));const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+ const P={};ORDER.forEach(x=>P[x]=pool(x));
+ const seq=(p,n)=>{const o=[];while(o.length<n){const sh=shuf(p);if(o.length&&sh.length>1&&sh[0]===o[o.length-1])sh.push(sh.shift());o.push(...sh)}return o.slice(0,n)};
+ let best=null,bs=1e9;
+ for(let t=0;t<4000&&bs>0;t++){const col={};ORDER.forEach(x=>col[x]=seq(P[x],7));const days=Array.from({length:7},(_,i)=>{const d={};ORDER.forEach(x=>d[x]=col[x][i]);return d});
+  const rs=rules(days);const sc=rs.filter(r=>!r.ok).length*10+rs.find(r=>r.id==="mix").v;if(sc<bs){bs=sc;best=days}}
+ return WK[key]=best}
+function planFor(k){const d=pd(k),dow=(d.getDay()+6)%7;const day=weekPlan(mondayOf(k))[dow];const out={};
+ for(const s of activeSlots()){const ov=S.overrides[k]&&S.overrides[k][s];out[s]=ov&&recipe(ov)?recipe(ov):day[s]}return out}
+function weekDays(mon){return Array.from({length:7},(_,i)=>planFor(addD(mon,i)))}
 
 /* ---------- 7. CANTIDADES Y SUSTITUCIONES ---------- */
 function resolve(key,q){const sb=S.subs[key];if(sb&&SUBS[key]){const a=SUBS[key].find(x=>x[0]===sb);if(a)return[a[0],q*a[1]]}return[key,q]}
@@ -271,7 +317,7 @@ let view="hoy",supOpen=false,shopWeek=0,editWeek=0,subPick="";
 const NAV=[["hoy","🍽️","Hoy"],["semana","📅","Semana"],["compra","🛒","Compra"],["sustituir","🔄","Sustituir"],["mas","⚙️","Más"]];
 function render(){document.documentElement.style.setProperty("--fs",[18,20,22,25,28][S.settings.font]+"px");document.documentElement.dataset.contrast=S.settings.contrast?"high":"";
  $("#nav").innerHTML=NAV.map(([v,i,t])=>`<button class="${view===v?"on":""}" data-act="nav" data-v="${v}" aria-label="${t}"><span class="i">${i}</span>${t}</button>`).join("");
- const f={hoy:vHoy,semana:vSemana,compra:vCompra,sustituir:vSustituir,mas:vMas}[view];$("#app").innerHTML=f();window.scrollTo(0,0)}
+ const f={hoy:vHoy,semana:vSemana,compra:vCompra,sustituir:vSustituir,mas:vMas,encuesta:vEncuesta}[view];$("#app").innerHTML=f();window.scrollTo(0,0)}
 
 function nextSlot(plan,k){const now=new Date();const hm=pad(now.getHours())+":"+pad(now.getMinutes());const l=dayLog(k);const sl=Object.keys(plan);
  for(const s of sl){if(!l.done[s]&&!l.skip[s]&&S.settings.times[s]>=addMin(hm,-60))return s}return sl.find(s=>!l.done[s]&&!l.skip[s])||null}
@@ -283,7 +329,10 @@ function vHoy(){const k=today(),plan=planFor(k),l=dayLog(k),sl=Object.keys(plan)
  if(nx){const r=plan[nx];h1+=`<div class="card hero"><div class="sub">Ahora te toca · ${SLOTS[nx].n} · ${S.settings.times[nx]}</div><h1>${SLOTS[nx].i} ${esc(r.name)}</h1><div class="sub">⏱ ${r.min} min · ${DIF[r.dif]}</div><button class="btn" data-act="recipe" data-d="${k}" data-s="${nx}">Ver cómo se hace</button></div>`}
  else h1+=`<div class="card hero"><h1>¡Hoy lo has hecho muy bien! 🎉</h1><div class="sub">Has completado todas tus comidas.</div></div>`;
  h1+=`<div class="card"><div class="row"><div class="grow"><b>Tu día</b><div class="sub">${done} de ${sl.length} comidas</div></div>${streak()>1?`<span class="tag">🔥 ${streak()} días seguidos</span>`:""}</div><div class="bar" style="margin-top:8px"><i style="width:${done/sl.length*100}%"></i></div><div style="margin-top:8px"><b>${cheer(done,sl.length)}</b></div></div>`;
+ if(S.settings.shopDays.includes(new Date().getDay()))h1+=`<div class="card" style="border-color:var(--brand)"><b>🛒 Hoy toca la compra</b><div class="sub">Te la tengo preparada.</div><button class="btn" data-act="nav" data-v="compra">Ver la lista</button></div>`;
+ if(!S.survey.done)h1+=`<div class="card" style="border-color:var(--brand)"><b>📋 Cuéntame cómo comes</b><div class="sub">Unas preguntas sencillas para ajustar tu menú a ti. Puedes parar y seguir otro día.</div><button class="btn" data-act="sstart">${S.survey.i>0?"Seguir con las preguntas":"Empezar"}</button></div>`;
  h1+=sl.map(s=>{const r=plan[s],ok=l.done[s],sk=l.skip[s];return `<div class="card meal ${ok?"done":""}"><div class="ico">${SLOTS[s].i}</div><div class="grow" data-act="recipe" data-d="${k}" data-s="${s}"><div class="sub">${SLOTS[s].n} · ${S.settings.times[s]}</div><div class="name">${esc(r.name)}</div>${sk?`<span class="tag">Me lo salté</span>`:""}</div><button class="check ${ok?"on":""}" data-act="done" data-d="${k}" data-s="${s}" aria-label="Marcar ${SLOTS[s].n} como hecho">${ok?"✓":""}</button></div>`}).join("");
+ if(S.settings.kiwi)h1+=`<div class="card meal ${l.kiwi?"done":""}"><div class="ico">🥝</div><div class="grow"><div class="name">Tu kiwi de hoy</div><div class="sub">Te ayuda a ir al baño</div></div><button class="check ${l.kiwi?"on":""}" data-act="kiwi" aria-label="Marcar el kiwi">${l.kiwi?"✓":""}</button></div>`;
  h1+=`<div class="card"><b>💧 Agua de hoy</b><div class="sub">Intenta llegar a 6-8 vasos, poco a poco.</div><div class="stepper" style="margin-top:8px"><button data-act="water" data-n="-1" aria-label="Quitar un vaso">−</button><b>${l.water||0} 🥛</b><button data-act="water" data-n="1" aria-label="Añadir un vaso">+</button></div></div>`;
  h1+=`<div class="notice">Menú orientativo. Si te mareas o encuentras mal, para y avisa a tu familia o a tu médico.</div>`;return h1}
 
@@ -296,21 +345,31 @@ function makeICS(){const st=S.settings,d=today().replace(/-/g,""),mon=mondayOf(t
  activeSlots().forEach(s=>ev("slot-"+s,"Mi Menu: "+SLOTS[s].n,st.times[s],"FREQ=DAILY",d));
  ev("repaso","Mi Menu: repasa tu dia y marca lo que has comido","21:00","FREQ=DAILY",d);
  ev("peso","Mi Menu: pesate y apunta tu peso","07:15","FREQ=WEEKLY;BYDAY=MO",mon);
+ st.shopDays.forEach(d=>ev("compra"+d,"Mi Menu: hoy toca la compra","10:00","FREQ=WEEKLY;BYDAY="+["SU","MO","TU","WE","TH","FR","SA"][d],addD(mondayOf(today()),(d+6)%7).replace(/-/g,"")));
  L.push("END:VCALENDAR");return L.join("\r\n")}
 function vSemana(){const k0=today(),mon=mondayOf(addD(k0,editWeek*7));let h=`<h1>Mi semana</h1><div class="row"><button class="btn alt small" data-act="wk" data-n="-1">← Anterior</button><button class="btn alt small" data-act="wk" data-n="0">Esta semana</button><button class="btn alt small" data-act="wk" data-n="1">Siguiente →</button></div>`;
  for(let i=0;i<7;i++){const k=addD(mon,i),plan=planFor(k),isT=k===k0;h+=`<details ${isT?"open":""}><summary>${isT?"⭐ ":""}${longDate(k)}</summary>${Object.entries(plan).map(([s,r])=>`<div class="meal" style="padding:8px 0;border-top:1px solid var(--line)" data-act="recipe" data-d="${k}" data-s="${s}"><div class="ico">${SLOTS[s].i}</div><div class="grow"><div class="sub">${SLOTS[s].n} · ${S.settings.times[s]}</div><div class="name">${esc(r.name)}</div></div><div>›</div></div>`).join("")}</details>`}
  return h}
 
-function shopData(){const mon=mondayOf(addD(today(),shopWeek*7));const tot={};const stp=new Set();
- for(let i=0;i<7;i++){const plan=planFor(addD(mon,i));Object.values(plan).forEach(r=>r.ing.forEach(([k,q])=>{const [rk,rq]=resolve(k,q);if(STAPLES.has(rk)){stp.add(rk);return}tot[rk]=(tot[rk]||0)+rq*scale()*S.settings.people}))}
- return{mon,tot,stp}}
-function vCompra(){const {mon,tot,stp}=shopData();const wk="s"+mon;const chk=S.shop[wk]=S.shop[wk]||{};const groups={};Object.entries(tot).forEach(([k,q])=>{(groups[ING[k][1]]=groups[ING[k][1]]||[]).push([k,q])});
- let h=`<h1>Lista de la compra</h1><p class="sub">Semana del ${pd(mon).getDate()} de ${MESES[pd(mon).getMonth()]} · para ${S.settings.people} ${S.settings.people===1?"persona":"personas"} · Mercadona o Aldi</p><div class="row"><button class="btn alt small" data-act="shopwk" data-n="0">Esta semana</button><button class="btn alt small" data-act="shopwk" data-n="1">Próxima semana</button></div>`;
+function dShort(k){const d=pd(k);return DIAS[d.getDay()].slice(0,3)+" "+d.getDate()}
+/* Cada compra cubre desde el día de compra hasta el día anterior a la siguiente compra. */
+function trips(){const t=today(),days=[...S.settings.shopDays].sort((a,b)=>a-b);if(!days.length)return[{start:t,end:addD(t,6)}];
+ const starts=[];for(let i=-7;i<=28;i++){const k=addD(t,i);if(days.includes(pd(k).getDay()))starts.push(k)}
+ const out=[];for(let i=0;i<starts.length-1;i++){const en=addD(starts[i+1],-1);if(en<t)continue;out.push({start:starts[i],end:en})}
+ return out.slice(0,3).map(x=>x.start<t?{...x,start:t,partial:true}:x)}
+const tripLabel=x=>x.partial?"Lo que falta hasta el "+dShort(x.end):(x.start===today()?"Hoy · ":"")+"Compra del "+dShort(x.start);
+function shopData(tr){const tot={},stp=new Set();let n=0;
+ for(let k=tr.start;k<=tr.end;k=addD(k,1)){n++;Object.values(planFor(k)).forEach(r=>r.ing.forEach(([key,q])=>{const [rk,rq]=resolve(key,q);if(STAPLES.has(rk)){stp.add(rk);return}tot[rk]=(tot[rk]||0)+rq*scale()*S.settings.people}));if(S.settings.kiwi)tot.kiwi=(tot.kiwi||0)+1}
+ return{tot,stp,n}}
+function shopLine(k,q){const u=ING[k][2];let s=shopFmt(u,q);if((u==="ud"||u==="lata")&&GR[k]){const n=Math.ceil(q-.001);s+=` (≈ ${Math.round(n*GR[k]/10)*10} g)`}return s}
+function curTrip(){const T=trips();if(shopWeek>=T.length)shopWeek=0;return T[shopWeek]}
+function vCompra(){const T=trips(),tr=curTrip();const {tot,stp,n}=shopData(tr);const wk="t"+tr.start+tr.end;const chk=S.shop[wk]=S.shop[wk]||{};const groups={};Object.entries(tot).forEach(([k,q])=>{(groups[ING[k][1]]=groups[ING[k][1]]||[]).push([k,q])});
+ let h=`<h1>Lista de la compra</h1><div>${T.map((x,i)=>`<button class="chip ${i===shopWeek?"on":""}" data-act="shopwk" data-n="${i}">${esc(tripLabel(x))}</button>`).join("")}</div><div class="card"><b>Esta compra cubre ${n} ${n===1?"día":"días"}</b><div class="sub">${dShort(tr.start)} → ${dShort(tr.end)} · para ${S.settings.people===1?"1 persona":S.settings.people+" personas"} · Mercadona o Aldi</div><div class="sub">Cantidades en gramos, listas para comprar.</div></div>`;
  let total=0,got=0;
- [CAT.V,CAT.C,CAT.L,CAT.D,CAT.F].forEach(c=>{const g=groups[c];if(!g)return;g.sort((a,b)=>ING[a[0]][0].localeCompare(ING[b[0]][0]));h+=`<h2>${c}</h2><div class="card" style="padding:4px 14px">`+g.map(([k,q])=>{total++;const on=chk[k];if(on)got++;return `<label class="shop ${on?"got":""}"><input type="checkbox" data-act="shopck" data-w="${wk}" data-k="${k}" ${on?"checked":""}><span class="grow"><b>${esc(ING[k][0])}</b>${ING[k][3]?`<div class="sub">${esc(ING[k][3])}</div>`:""}</span><b>${shopFmt(ING[k][2],q)}</b></label>`}).join("")+`</div>`});
+ [CAT.V,CAT.C,CAT.L,CAT.D,CAT.F].forEach(c=>{const g=groups[c];if(!g)return;g.sort((a,b)=>ING[a[0]][0].localeCompare(ING[b[0]][0]));h+=`<h2>${c}</h2><div class="card" style="padding:4px 14px">`+g.map(([k,q])=>{total++;const on=chk[k];if(on)got++;return `<label class="shop ${on?"got":""}"><input type="checkbox" data-act="shopck" data-w="${wk}" data-k="${k}" ${on?"checked":""}><span class="grow"><b>${esc(ING[k][0])}</b>${ING[k][3]?`<div class="sub">${esc(ING[k][3])}</div>`:""}</span><b style="text-align:right;min-width:4.6em">${shopLine(k,q)}</b></label>`}).join("")+`</div>`});
  if(stp.size)h+=`<h2>${CAT.P}</h2><div class="card">${[...stp].map(k=>`<span class="chip">${esc(ING[k][0])}</span>`).join("")}</div>`;
  h+=`<div class="card"><b>Llevas ${got} de ${total}</b><div class="bar" style="margin-top:8px"><i style="width:${total?got/total*100:0}%"></i></div></div><button class="btn" data-act="share">📤 Enviar la lista (WhatsApp)</button><button class="btn alt" data-act="copy">📋 Copiar la lista</button>`;return h}
-function shopText(){const {mon,tot,stp}=shopData();let t="🛒 Lista de la compra\n";const g={};Object.entries(tot).forEach(([k,q])=>(g[ING[k][1]]=g[ING[k][1]]||[]).push(`• ${ING[k][0]}: ${shopFmt(ING[k][2],q)}`));Object.entries(g).forEach(([c,a])=>t+=`\n${c}\n${a.join("\n")}\n`);if(stp.size)t+=`\n${CAT.P}\n${[...stp].map(k=>ING[k][0]).join(", ")}`;return t}
+function shopText(){const tr=curTrip(),{tot,stp}=shopData(tr);let t=`🛒 Compra del ${dShort(tr.start)} al ${dShort(tr.end)}\n`;const g={};Object.entries(tot).forEach(([k,q])=>(g[ING[k][1]]=g[ING[k][1]]||[]).push(`• ${ING[k][0]}: ${shopLine(k,q)}`));Object.entries(g).forEach(([c,a])=>t+=`\n${c}\n${a.join("\n")}\n`);if(stp.size)t+=`\n${CAT.P}\n${[...stp].map(k=>ING[k][0]).join(", ")}`;return t}
 
 function vSustituir(){const used=[...new Set(R.flatMap(r=>r.ing.map(x=>x[0])))].filter(k=>SUBS[k]).sort((a,b)=>ING[a][0].localeCompare(ING[b][0]));
  let h=`<h1>No tengo un ingrediente</h1><p class="sub">Toca el que te falta y te digo con qué cambiarlo.</p>`;
@@ -321,6 +380,7 @@ function vSustituir(){const used=[...new Set(R.flatMap(r=>r.ing.map(x=>x[0])))].
 function vMas(){const st=S.settings;if(supOpen)return vSup();
  return `<h1>Más</h1><div class="card"><b>Tamaño de letra</b><div class="stepper" style="margin-top:8px"><button data-act="font" data-n="-1" aria-label="Letra más pequeña">A−</button><b>${["Pequeña","Normal","Grande","Muy grande","Enorme"][st.font]}</b><button data-act="font" data-n="1" aria-label="Letra más grande">A+</button></div><button class="btn ${st.contrast?"":"alt"}" data-act="contrast">${st.contrast?"✓ Alto contraste activado":"Activar alto contraste"}</button></div>
  <button class="btn" data-act="ics">🔔 Poner recordatorios en el móvil</button>
+ <button class="btn alt" data-act="sstart">📋 Cuéntame cómo comes (encuesta)</button>
  <button class="btn alt" data-act="hist">📝 Mi registro de estos días</button>
  <button class="btn alt" data-act="weight">⚖️ Apuntar mi peso</button>
  <button class="btn alt" data-act="help">❓ ¿Cómo funciona esto?</button>
@@ -329,7 +389,7 @@ function vMas(){const st=S.settings;if(supOpen)return vSup();
 
 /* ---------- 11. PANEL FAMILIAR ---------- */
 function stats(){let planned=0,done=0,skip=0;lastDays(7).forEach(k=>{const l=S.log[k];const n=activeSlots().length;planned+=n;if(l){done+=Object.keys(l.done).length;skip+=Object.keys(l.skip).length}});return{planned,done,skip,pct:planned?Math.round(done/planned*100):0}}
-function dayKcal(k){return Math.round(Object.values(planFor(k)).reduce((a,r)=>a+r.kcal,0)*S.settings.portion)}
+function dayKcal(k){return Math.round((Object.values(planFor(k)).reduce((a,r)=>a+r.kcal,0)+(S.settings.kiwi?45:0))*S.settings.portion)}
 function chart(){const w=[...S.weights].sort((a,b)=>a.date.localeCompare(b.date));if(w.length<2)return `<div class="sub">Aún no hay suficientes pesos.</div>`;const min=Math.min(...w.map(x=>x.kg))-.5,max=Math.max(...w.map(x=>x.kg))+.5;const W=300,H=110;const pts=w.map((x,i)=>[10+i*(W-20)/(w.length-1),H-10-(x.kg-min)/(max-min)*(H-30)]);
  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolución del peso"><polyline fill="none" stroke="var(--brand)" stroke-width="3" points="${pts.map(p=>p.join(",")).join(" ")}"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--brand)"/><text x="${p[0]}" y="${p[1]-8}" font-size="10" text-anchor="middle" fill="currentColor">${w[i].kg}</text>`).join("")}</svg>`}
 function vSup(){const st=S.settings,s=stats(),al=alerts();const mon=mondayOf(addD(today(),editWeek*7));
@@ -345,6 +405,9 @@ function vSup(){const st=S.settings,s=stats(),al=alerts();const mon=mondayOf(add
  <b>Personas para las que se cocina</b><div class="stepper"><button data-act="people" data-n="-1">−</button><b>${st.people}</b><button data-act="people" data-n="1">+</button></div>
  <b>Dificultad máxima de recetas</b><div>${[1,2,3].map(n=>`<button class="chip ${st.maxDif===n?"on":""}" data-act="dif" data-n="${n}">${DIF[n]}</button>`).join("")}</div>
  <b>Horarios</b>${ORDER.map(o=>`<label class="sub">${SLOTS[o].i} ${SLOTS[o].n}<input type="time" value="${st.times[o]}" data-act="time" data-s="${o}"></label>`).join("")}</details>`;
+ h+=`<details open><summary>⚖️ Equilibrio de la semana</summary>${[0,1].map(w=>{const m=addD(mondayOf(today()),w*7);return `<b>${w?"Próxima semana":"Esta semana"}</b>`+rules(weekDays(m)).map(r=>`<div class="sub">${r.ok?"✅":"⚠️"} ${r.txt} <b>(${r.v})</b></div>`).join("")}).join("")}<div class="sub">Pautas generales de alimentación saludable aplicadas automáticamente; no sustituyen la pauta de su médico o nutricionista. Si un ⚠️ no se puede cumplir, suele ser porque se han excluido demasiados alimentos.</div></details>`;
+ h+=`<details><summary>🛒 Compra, kiwi y tiempo de cocina</summary><b>¿Qué días va al súper?</b><div>${[1,2,3,4,5,6,0].map(d=>`<button class="chip ${st.shopDays.includes(d)?"on":""}" data-act="shopday" data-n="${d}">${DIAS[d].slice(0,3)}</button>`).join("")}</div><div class="sub">Cada compra cubre hasta el día anterior a la siguiente.</div><button class="btn ${st.kiwi?"":"alt"}" data-act="kiwitog">${st.kiwi?"✓ Kiwi diario activado":"Activar kiwi diario"}</button><b>Tiempo máximo de cocina</b><div>${[15,30,45,60].map(n=>`<button class="chip ${st.maxMin===n?"on":""}" data-act="maxmin" data-n="${n}">${n===60?"Sin límite":n+" min"}</button>`).join("")}</div></details>`;
+ h+=`<details><summary>📋 Encuesta (${S.survey.done?"completada":"sin completar"})</summary>${surveyHTML()}</details>`;
  h+=`<details><summary>🚫 Alimentos excluidos</summary><div class="sub">Toca para excluir o permitir. Las recetas con un alimento excluido no se proponen.</div>${[...new Set(R.flatMap(r=>r.ing.map(x=>x[0])).concat(st.excluded))].filter(k=>!STAPLES.has(k)).sort((a,b)=>ING[a][0].localeCompare(ING[b][0])).map(k=>`<button class="chip ${st.excluded.includes(k)?"off":""}" data-act="excl" data-k="${k}">${st.excluded.includes(k)?"🚫 ":""}${esc(ING[k][0])}</button>`).join("")}</details>`;
  h+=`<details><summary>📅 Editar el plan de la semana</summary><div class="row"><button class="btn alt small" data-act="wk" data-n="-1">←</button><button class="btn alt small" data-act="wk" data-n="1">→</button><span class="sub">Semana del ${pd(mon).getDate()}/${pd(mon).getMonth()+1}</span></div>`+
  Array.from({length:7},(_,i)=>{const k=addD(mon,i),plan=planFor(k);return `<div style="border-top:1px solid var(--line);padding:6px 0"><b>${longDate(k)}</b> <span class="sub">${dayKcal(k)} kcal</span>${Object.entries(plan).map(([sl,r])=>`<label class="sub">${SLOTS[sl].n}<select data-act="override" data-d="${k}" data-s="${sl}">${R.filter(x=>x.slot===sl).map(x=>`<option value="${x.id}" ${x.id===r.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select></label>`).join("")}</div>`}).join("")+`<button class="btn danger small" data-act="resetplan">Restablecer plan automático</button></details>`;
@@ -353,6 +416,95 @@ function vSup(){const st=S.settings,s=stats(),al=alerts();const mon=mondayOf(add
  h+=`<details><summary>🔒 Perfil y datos</summary><label class="sub">Nombre (opcional)<input type="text" value="${esc(st.name)}" data-act="name"></label><label class="sub">PIN del panel<input type="text" inputmode="numeric" value="${esc(st.pin)}" data-act="pin"></label><button class="btn alt" data-act="export">⬇️ Guardar copia de seguridad</button><label class="btn alt" style="cursor:pointer">⬆️ Cargar copia<input type="file" accept=".json" data-act="import" hidden></label><button class="btn danger" data-act="reset">Borrar todo y empezar de cero</button></details>`;
  return h}
 function logTable(){const rows=lastDays(10).map(k=>{const l=S.log[k];if(!l)return "";const p=Object.entries(l.done);return `<tr><td>${longDate(k).split(" de ")[0]}</td><td>${p.length}✓ ${Object.keys(l.skip).length?Object.keys(l.skip).length+"✗":""}</td><td>${[...new Set(p.flatMap(([_,d])=>(d.inc||[]).concat(d.hunger==="mucha"?["Hambre"]:[],d.energy==="cansada"?["Cansada"]:[])))].join(", ")||"—"}</td></tr>`}).join("");return `<table><tr><th>Día</th><th>Comidas</th><th>Incidencias</th></tr>${rows}</table>`}
+
+/* ---------- 11b. ENCUESTA ---------- */
+const DAYS_OPT=[["1","Lunes"],["2","Martes"],["3","Miércoles"],["4","Jueves"],["5","Viernes"],["6","Sábado"],["0","Domingo"]];
+const DISLIKE=[["avena","Avena",["avena"]],["tomate","Tomate natural",["tomate"]],["coliflor","Coliflor",["coliflor"]],["brocoli","Brócoli",["brocoli"]],["espinacas","Espinacas",["espinacas","acelgas"]],["champi","Champiñones",["champi"]],["pimiento","Pimiento",["pimiento"]],["cebolla","Cebolla y puerro",["cebolla","puerro"]],["calabaza","Calabaza",["calabaza"]],["calabacin","Calabacín",["calabacin"]],["judias","Judías verdes",["judias"]],["legumbres","Legumbres",["lentejas","garbanzos","alubias"]],["azul","Pescado azul (salmón, caballa)",["salmon","caballa","caballa_lata"]],["atun","Atún en lata",["atun"]],["blanco","Pescado blanco (merluza, bacalao)",["merluza","bacalao"]],["gambas","Gambas",["gambas"]],["huevo","Huevo",["huevo"]],["yogur","Yogur y kéfir",["yogur_nat","yogur_griego","kefir"]],["queso","Queso fresco",["queso_fresco","requeson","skyr","queso_light"]],["pavo","Pavo y fiambre",["pavo_filete","pavo_fiambre","jamon_cocido"]],["pollo","Pollo",["pechuga_pollo"]],["compota","Compota de manzana",["compota"]],["nueces","Nueces y almendras",["nueces","almendras"]]];
+const SURVEY=[
+{s:"Tu día",id:"wake",t:"time",d:"07:00",q:"¿A qué hora te levantas normalmente?"},
+{id:"breakfast",t:"time",d:"07:30",q:"¿A qué hora te gustaría desayunar?"},
+{id:"lunch",t:"time",d:"13:30",q:"¿A qué hora comes normalmente?"},
+{id:"dinner",t:"time",d:"19:15",q:"¿A qué hora te gustaría cenar?"},
+{id:"bed",t:"time",d:"22:30",q:"¿A qué hora te acuestas?"},
+{id:"meals",t:"one",q:"¿Cuántas comidas al día te resultan cómodas?",o:[["3","3: desayuno, comida y cena"],["4","4: con merienda"],["5","5: con media mañana y merienda"]]},
+{id:"hungry",t:"multi",q:"¿Cuándo te entran más ganas de picar?",o:[["manana","A media mañana"],["tras","Después de comer"],["tarde","Por la tarde"],["noche","Por la noche"],["nunca","Casi nunca"]]},
+{id:"snack",t:"multi",q:"¿Qué sueles picar?",o:[["dulce","Dulces o galletas"],["salado","Cosas saladas"],["pan","Pan"],["fruta","Fruta"],["nada","Nada"]]},
+{s:"El desayuno",id:"bfast",t:"multi",q:"¿Qué desayunos te gustan más?",o:[["salada","Tostada salada (pavo, aceite)"],["dulce","Tostada dulce"],["huevo","Algo con huevo"],["queso","Queso fresco"],["yogur","Yogur"],["fruta","Fruta"],["bocata","Bocadillo pequeño"]]},
+{id:"drink",t:"one",q:"¿Qué tomas por la mañana?",o:[["cafe","Café solo"],["vegetal","Café con bebida vegetal"],["infusion","Infusión o té"],["otro","Otra cosa"]]},
+{id:"bread",t:"one",q:"¿Qué pan prefieres?",o:[["integral","Integral"],["blanco","Blanco"],["centeno","Centeno o de semillas"],["noimporta","Me da igual"]]},
+{id:"yogurt",t:"one",q:"¿Te gusta el yogur?",o:[["si","Sí"],["aveces","A veces"],["no","No"]]},
+{id:"cheese",t:"one",q:"¿Te gusta el queso fresco?",o:[["si","Sí"],["aveces","A veces"],["no","No"]]},
+{id:"compota",t:"one",q:"La compota de manzana que tomas, ¿cómo es?",o:[["sin","Sin azúcar añadido"],["con","Con azúcar"],["nose","No lo sé"],["nada","Ya no la tomo"]]},
+{id:"kiwi",t:"one",q:"¿Quieres seguir tomando un kiwi al día?",o:[["si","Sí, me va bien"],["no","No, prefiero otra fruta"]]},
+{s:"Tus gustos",id:"dislike",t:"multi",q:"Marca lo que NO te gusta o no quieres ver",o:DISLIKE.map(x=>[x[0],x[1]])},
+{id:"loves",t:"text",q:"¿Qué platos te encantan? Puedes escribir varios."},
+{id:"legum",t:"one",q:"¿Cuántas veces por semana te apetecen legumbres (lentejas, garbanzos…)?",o:[["0","Ninguna"],["1","1 vez"],["2","2 veces"],["3","3 veces"]]},
+{id:"fish",t:"one",q:"¿Cuántas veces por semana te apetece pescado?",o:[["0","Ninguna"],["2","2 veces"],["3","3 veces"],["4","4 o más"]]},
+{id:"fruit",t:"multi",q:"¿Qué fruta te gusta?",o:[["pera","Pera"],["manzana","Manzana"],["platano","Plátano"],["naranja","Naranja"],["mandarina","Mandarina"],["fresas","Fresas"],["uvas","Uvas"],["melon","Melón o sandía"],["kiwi","Kiwi"]]},
+{id:"sweet",t:"one",q:"¿Te cuesta resistirte a los dulces?",o:[["no","No"],["aveces","A veces"],["si","Casi todos los días"]]},
+{s:"Cocina y compra",id:"cook",t:"one",q:"¿Cuánto tiempo quieres dedicar a cocinar cada comida?",o:[["15","Hasta 15 minutos"],["30","Hasta 30 minutos"],["45","Hasta 45 minutos"],["60","Me da igual"]]},
+{id:"batch",t:"one",q:"¿Cómo prefieres cocinar?",o:[["cada","Algo fresco cada día"],["batch","Un día para varios días"],["mixto","Un poco de cada"]]},
+{id:"tools",t:"multi",q:"¿Qué usas para cocinar?",o:[["thermo","Thermomix"],["horno","Horno"],["micro","Microondas"],["freidora","Freidora de aire"],["olla","Olla o cazuela"]]},
+{id:"shopdays",t:"multi",q:"¿Qué días sueles ir a comprar?",o:DAYS_OPT},
+{id:"shops",t:"multi",q:"¿Dónde compras?",o:[["mercadona","Mercadona"],["aldi","Aldi"],["mercado","Mercado o tiendas de barrio"],["domicilio","A domicilio"],["otro","Otro sitio"]]},
+{id:"budget",t:"one",q:"¿Cuánto gastas más o menos a la semana en comida?",o:[["30","Menos de 30 €"],["45","Entre 30 y 45 €"],["60","Entre 45 y 60 €"],["70","Más de 60 €"],["nose","No lo sé"]]},
+{s:"Cómo te encuentras",id:"transit",t:"one",q:"¿Cómo va tu tránsito intestinal?",o:[["bien","Bien"],["aveces","Estreñimiento a veces"],["mucho","Estreñimiento casi siempre"],["suelto","Suelto o diarrea a veces"]]},
+{id:"water",t:"one",q:"¿Cuántos vasos de agua bebes al día?",o:[["0-2","0 a 2"],["3-5","3 a 5"],["6-8","6 a 8"],["9+","Más de 8"]]},
+{id:"energy",t:"multi",q:"¿Cuándo te notas con menos energía?",o:[["manana","Por la mañana"],["tras","Después de comer"],["tarde","Por la tarde"],["noche","Por la noche"],["nunca","Casi nunca"]]},
+{id:"bad",t:"multi",q:"¿Te sienta mal alguna comida?",o:[["gases","Me da gases"],["acidez","Acidez"],["hinchazon","Hinchazón"],["nada","Nada me sienta mal"]]},
+{id:"badtext",t:"text",q:"Si alguna comida te sienta mal, ¿cuál? (déjalo en blanco si ninguna)"},
+{id:"teeth",t:"multi",q:"Con tu dentadura, ¿qué te cuesta morder?",o:[["manzana","Manzana entera"],["secos","Frutos secos"],["crujiente","Pan crujiente"],["carne","Carne dura"],["nada","Nada"]]},
+{id:"gym",t:"multi",q:"¿Qué días vas al gimnasio?",o:DAYS_OPT},
+{id:"pain",t:"one",q:"¿El dolor o el cansancio te impiden cocinar algún día?",o:[["nunca","Nunca"],["aveces","A veces"],["mucho","Bastantes días"]]},
+{s:"Para no abandonar",id:"hard",t:"multi",q:"¿Qué es lo que más te cuesta?",o:[["picar","Resistir el picoteo"],["cocinar","Cocinar"],["organizar","Organizarme"],["constancia","Ser constante"],["fuera","Comer fuera de casa"],["animo","Los días de poco ánimo"]]},
+{id:"help",t:"multi",q:"¿Qué te ayuda a no abandonar?",o:[["avisos","Avisos en el móvil"],["animo","Mensajes de ánimo"],["peso","Ver cómo baja mi peso"],["hijo","Que mi hijo me anime"],["premio","Un capricho pequeño a la semana"],["recetas","Recetas nuevas"]]},
+{id:"alerts",t:"one",q:"¿Cuántos avisos quieres al día?",o:[["todas","Uno en cada comida"],["dos","Solo en comida y cena"],["uno","Uno al día"]]},
+{id:"free",t:"text",q:"¿Quieres contarme algo más?"}
+];
+const secOf=i=>{for(let j=i;j>=0;j--)if(SURVEY[j].s)return SURVEY[j].s;return""};
+const optLabel=(q,v)=>{const o=(q.o||[]).find(x=>x[0]===v);return o?o[1]:v};
+function ansText(q){const a=S.survey.answers[q.id];if(a===undefined)return"";return Array.isArray(a)?a.map(v=>optLabel(q,v)).join(", "):(q.t==="one"?optLabel(q,a):a)}
+const toM=t=>{const [h,m]=t.split(":").map(Number);return h*60+m};
+const fromM=n=>{n=Math.round(n/5)*5;return pad(Math.floor(n/60))+":"+pad(n%60)};
+/* Aplica SOLO preferencias seguras (horarios, gustos, días de compra, tiempo de cocina, nº de comidas, kiwi). Es reversible desde el panel. */
+function applySurvey(){const a=S.survey.answers,st=S.settings,prev={times:{...st.times},excluded:[...st.excluded],meals:st.meals,maxMin:st.maxMin,shopDays:[...st.shopDays],kiwi:st.kiwi},ch=[];
+ if(a.breakfast)st.times.desayuno=a.breakfast;if(a.lunch)st.times.comida=a.lunch;if(a.dinner)st.times.cena=a.dinner;
+ if(a.breakfast||a.lunch){st.times.media=fromM((toM(st.times.desayuno)+toM(st.times.comida))/2)}
+ if(a.lunch||a.dinner){st.times.merienda=fromM((toM(st.times.comida)+toM(st.times.cena))/2)}
+ if(a.breakfast||a.lunch||a.dinner)ch.push("horarios ("+activeSlots().map(s=>SLOTS[s].n.split(" ")[0]+" "+st.times[s]).join(", ")+")");
+ if(a.meals){st.meals=Number(a.meals);ch.push(a.meals+" comidas al día")}
+ if(a.dislike&&a.dislike.length){const ex=new Set(st.excluded);DISLIKE.filter(x=>a.dislike.includes(x[0])).forEach(x=>x[2].forEach(k=>ex.add(k)));st.excluded=[...ex];ch.push("alimentos excluidos")}
+ if(a.cook){st.maxMin=Number(a.cook);ch.push("cocina máx. "+(a.cook==="60"?"sin límite":a.cook+" min"))}
+ if(a.shopdays&&a.shopdays.length){st.shopDays=a.shopdays.map(Number);ch.push("días de compra")}
+ if(a.kiwi){st.kiwi=a.kiwi==="si";ch.push(st.kiwi?"kiwi diario":"sin kiwi diario")}
+ S.adaptLog.push({date:today(),msg:"Encuesta aplicada: "+(ch.join("; ")||"sin cambios"),key:"multi",prev});S.survey.done=true;save()}
+/* Cosas que NO se aplican solas: se enseñan al supervisor para decidir o comentar con el médico. */
+function surveyFlags(){const a=S.survey.answers,f=[];
+ if(a.transit==="mucho"||a.transit==="aveces")f.push("Tránsito: tiene estreñimiento. El plan incluye kiwi, verdura, legumbres y agua; si persiste, comentarlo con su médico.");
+ if(a.transit==="suelto")f.push("Tránsito suelto o diarrea: revisar con su médico antes de subir fibra.");
+ if(a.water==="0-2")f.push("Bebe muy poca agua (su informe indicaba agua corporal baja): subir poco a poco y comentarlo con su médico.");
+ if((a.energy||[]).some(x=>x!=="nunca"))f.push("Baja energía en: "+(a.energy||[]).filter(x=>x!=="nunca").map(x=>optLabel(SURVEY.find(q=>q.id==="energy"),x)).join(", ")+". Revisar raciones y horarios con el nutricionista.");
+ if((a.hungry||[]).includes("noche")&&a.dinner&&toM(a.dinner)<20*60)f.push("Pica por la noche y cena temprano: valorar con el nutricionista una cena algo más completa o una infusión.");
+ if(a.sweet==="si")f.push("Antojo de dulce casi a diario: las meriendas incluyen fruta y compota; valorar un capricho pactado a la semana.");
+ if((a.bad||[]).some(x=>x!=="nada"))f.push("Le sientan mal algunos alimentos"+(a.badtext?": "+a.badtext:"")+". Añadirlos a excluidos si se confirman.");
+ if((a.teeth||[]).some(x=>x!=="nada"))f.push("Dentadura: le cuesta "+(a.teeth||[]).filter(x=>x!=="nada").map(x=>optLabel(SURVEY.find(q=>q.id==="teeth"),x).toLowerCase()).join(", ")+".");
+ if(a.pain==="mucho"||a.pain==="aveces")f.push("El dolor o cansancio le impide cocinar algunos días: cocinar un día para varios o usar recetas de 15 min.");
+ if(a.bread&&a.bread!=="integral"&&a.bread!=="noimporta")f.push("Prefiere pan "+optLabel(SURVEY.find(q=>q.id==="bread"),a.bread).toLowerCase()+": el plan usa pan integral; decidir si se cambia.");
+ if(a.yogurt==="no")f.push("No le gusta el yogur: excluirlo en 'Alimentos excluidos' (hay varias recetas con yogur).");
+ if(a.budget&&a.budget!=="nose")f.push("Presupuesto semanal actual: "+optLabel(SURVEY.find(q=>q.id==="budget"),a.budget)+" (la app todavía no calcula precios).");
+ return f}
+function surveyText(){return "📋 Respuestas de la encuesta\n\n"+SURVEY.filter(q=>ansText(q)!=="").map(q=>`• ${q.q}\n  → ${ansText(q)}`).join("\n")}
+function surveyHTML(){const a=S.survey.answers,fl=surveyFlags();const rows=SURVEY.filter(q=>ansText(q)!=="").map(q=>`<tr><td>${esc(q.q)}</td><td><b>${esc(ansText(q))}</b></td></tr>`).join("");
+ return `<div class="sub">${S.survey.done?"Completada y aplicada al plan.":"Respondidas "+Object.keys(a).length+" de "+SURVEY.length+"."}</div>${fl.length?`<div class="notice"><b>Para revisar contigo o con su médico (no se aplica solo):</b><br>${fl.map(x=>"• "+esc(x)).join("<br>")}</div>`:""}<table>${rows}</table><button class="btn alt" data-act="sapply">Aplicar de nuevo al plan</button><button class="btn alt" data-act="ssend">📤 Enviar las respuestas</button><button class="btn danger" data-act="srestart">Repetir la encuesta desde cero</button>`}
+function vEncuesta(){const sv=S.survey,N=SURVEY.length;
+ if(sv.i>=N){const last=S.adaptLog.filter(x=>x.msg.startsWith("Encuesta")).pop();return `<h1>${sv.done?"¡Listo, gracias! 🎉":"¡Has terminado! 🎉"}</h1><div class="card">${sv.done?`<b>Ya he ajustado tu menú.</b><div class="sub">${esc(last?last.msg:"")}</div>`:`<b>Con tus respuestas voy a ajustar tu menú:</b> horarios, comidas que no te gustan y días de compra.`}</div>${sv.done?"":`<button class="btn" data-act="sfinish">✅ Ajustar mi menú</button>`}<button class="btn alt" data-act="ssend">📤 Enviar mis respuestas a mi hijo</button><button class="btn alt" data-act="sprev">← Revisar la última pregunta</button><button class="btn alt" data-act="sgo">Ir a mi menú</button>`}
+ const q=SURVEY[sv.i],a=sv.answers[q.id];
+ let h=`<div class="sub">${esc(secOf(sv.i))} · pregunta ${sv.i+1} de ${N}</div><div class="bar"><i style="width:${sv.i/N*100}%"></i></div><h1 style="margin-top:14px">${esc(q.q)}</h1>`;
+ if(q.t==="one")h+=q.o.map(([v,l])=>`<button class="btn ${a===v?"":"alt"}" data-act="sans" data-id="${q.id}" data-v="${v}">${a===v?"✓ ":""}${esc(l)}</button>`).join("");
+ else if(q.t==="multi")h+=`<div>${q.o.map(([v,l])=>`<button class="chip ${(a||[]).includes(v)?"on":""}" data-act="smulti" data-id="${q.id}" data-v="${v}">${esc(l)}</button>`).join("")}</div><button class="btn" data-act="snext">Siguiente →</button>`;
+ else if(q.t==="time")h+=`<input type="time" id="sin" value="${esc(a||q.d||"")}"><button class="btn" data-act="snext">Siguiente →</button>`;
+ else h+=`<textarea id="sin" rows="3" placeholder="Escribe aquí (o usa el micrófono del teclado)">${esc(a||"")}</textarea><button class="btn" data-act="snext">Siguiente →</button>`;
+ return h+`<div style="margin-top:12px"><button class="btn alt small" data-act="sprev">← Atrás</button><button class="btn alt small" data-act="sskip">Saltar</button><button class="btn alt small" data-act="sgo">Seguir otro día</button></div>`}
 
 /* ---------- 12. RECETA Y HOJAS ---------- */
 function openRecipe(k,s){const plan=planFor(k),r=plan[s];if(!r)return;const l=dayLog(k);
@@ -398,7 +550,19 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(
  excl(){const x=S.settings.excluded,i=x.indexOf(D.k);i<0?x.push(D.k):x.splice(i,1);save();render()},
  resetplan(){S.overrides={};save();render()},
  remind(){S.settings.remind.on=!S.settings.remind.on;if(S.settings.remind.on&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission();save();render()},
- undo(){const a=S.adaptLog[Number(D.i)];if(a&&a.key!=="none"){S.settings[a.key]=a.prev;a.key="none";a.msg+=" (deshecho)";save();render()}},
+ undo(){const a=S.adaptLog[Number(D.i)];if(!a||a.key==="none")return;if(a.key==="multi")Object.assign(S.settings,a.prev);else S.settings[a.key]=a.prev;a.key="none";a.msg+=" (deshecho)";save();render()},
+ kiwi(){const l=dayLog(today());l.kiwi=!l.kiwi;save();render()},kiwitog(){S.settings.kiwi=!S.settings.kiwi;save();render()},
+ shopday(){const x=S.settings.shopDays,n=Number(D.n),i=x.indexOf(n);i<0?x.push(n):x.splice(i,1);save();render()},
+ maxmin(){S.settings.maxMin=Number(D.n);save();render()},
+ sstart(){close();view="encuesta";supOpen=false;if(S.survey.i>=SURVEY.length&&!S.survey.done)S.survey.i=0;render()},
+ sans(){S.survey.answers[D.id]=D.v;S.survey.i++;save();render()},
+ smulti(){const a=S.survey.answers,arr=a[D.id]=a[D.id]||[],i=arr.indexOf(D.v);i<0?arr.push(D.v):arr.splice(i,1);save();const y=scrollY;render();scrollTo(0,y)},
+ snext(){const q=SURVEY[S.survey.i],el=$("#sin");if(el&&(q.t==="time"||q.t==="text"))S.survey.answers[q.id]=el.value;S.survey.i++;save();render()},
+ sprev(){S.survey.i=Math.max(0,S.survey.i-1);save();render()},sskip(){S.survey.i++;save();render()},
+ sfinish(){applySurvey();render()},sapply(){applySurvey();render();toast("Encuesta aplicada ✓")},
+ sgo(){view="hoy";supOpen=false;render()},
+ srestart(){S.survey={answers:{},i:0,done:false};save();view="encuesta";supOpen=false;render()},
+ ssend(){const t=surveyText();if(navigator.share)navigator.share({text:t}).catch(()=>{});else window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank")},
  cleardemo(){S.log={};S.weights=[];S.demo=false;save();render()},
  export(){const u=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));const x=document.createElement("a");x.href=u;x.download="mi-menu-copia.json";x.click()},
  reset(){if(confirm("¿Seguro que quieres borrar todo?")){localStorage.removeItem(KEY);load();supOpen=false;render()}}
@@ -409,7 +573,7 @@ document.addEventListener("change",e=>{const t=e.target,a=t.dataset.act;if(!a)re
  else if(a==="lead"){S.settings.remind.lead=Number(t.value);save()}
  else if(a==="name"){S.settings.name=t.value;save()}
  else if(a==="pin"){if(t.value.length>=4){S.settings.pin=t.value;save()}}
- else if(a==="import"){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(j.settings){S=j;save();render()}}catch(_){toast("Archivo no válido")}};r.readAsText(f)}});
+ else if(a==="import"){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(j.settings){S=j;S.survey=S.survey||{answers:{},i:0,done:false};S.settings={...DEF.settings,...S.settings};save();render()}}catch(_){toast("Archivo no válido")}};r.readAsText(f)}});
 
 /* ---------- 14. RECORDATORIOS (con la app abierta) ---------- */
 function checkReminders(){if(!S.settings.remind.on)return;const now=new Date(),k=today();const plan=planFor(k);
