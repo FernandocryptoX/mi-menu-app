@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Mi Menú</title>
+<style>
+:root{--fs:22px;--bg:#fbf7ef;--card:#ffffff;--ink:#1f2a24;--muted:#55635b;--brand:#2f6b4f;--brand-ink:#ffffff;--soft:#e4f0e8;--warn:#fff1d6;--warn-ink:#6b4400;--line:#d8d2c4;--bad:#a4281d;--ok:#1d7a3e}
+:root[data-contrast="high"]{--bg:#000;--card:#111;--ink:#fff;--muted:#e8e8e8;--brand:#ffd400;--brand-ink:#000;--soft:#222;--warn:#332600;--warn-ink:#ffe08a;--line:#fff;--bad:#ff8a80;--ok:#7dff9a}
+*{box-sizing:border-box}
+html{font-size:var(--fs)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.35;-webkit-text-size-adjust:100%}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+#app{max-width:640px;margin:0 auto;padding:16px 16px 120px}
+h1{font-size:1.5rem;margin:.2em 0 .3em;line-height:1.15}
+h2{font-size:1.15rem;margin:1.1em 0 .4em}
+.sub{color:var(--muted);font-size:.8rem}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px;margin:12px 0}
+.hero{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.hero .sub{color:inherit;opacity:.9}
+.btn{display:block;width:100%;min-height:56px;border-radius:16px;border:2px solid var(--brand);background:var(--brand);color:var(--brand-ink);font-weight:700;padding:10px 14px;margin:8px 0;text-align:center}
+.btn.alt{background:var(--card);color:var(--brand)}
+.hero .btn{background:var(--brand-ink);color:var(--brand);border-color:var(--brand-ink)}
+:root[data-contrast="high"] .btn.alt{color:var(--brand)}
+.btn.small{min-height:44px;font-size:.8rem;display:inline-block;width:auto;margin:4px 6px 4px 0}
+.btn.danger{background:var(--card);color:var(--bad);border-color:var(--bad)}
+.row{display:flex;gap:10px;align-items:center}
+.row>.grow{flex:1;min-width:0}
+.chip{display:inline-block;border:2px solid var(--line);border-radius:999px;padding:8px 14px;margin:4px 6px 4px 0;background:var(--card);min-height:44px;font-size:.85rem}
+.chip.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.chip.off{border-color:var(--bad);color:var(--bad)}
+.meal{display:flex;gap:12px;align-items:center}
+.meal .ico{font-size:1.8rem;width:2.2rem;text-align:center}
+.meal.done{opacity:.75;background:var(--soft)}
+.meal .name{font-weight:700}
+.check{width:60px;height:60px;border-radius:16px;border:3px solid var(--brand);background:var(--card);font-size:1.7rem;color:var(--brand);flex:none}
+.check.on{background:var(--brand);color:var(--brand-ink)}
+.tag{display:inline-block;background:var(--soft);border-radius:8px;padding:2px 8px;font-size:.75rem;margin-right:6px}
+.notice{background:var(--warn);color:var(--warn-ink);border-radius:14px;padding:12px;margin:12px 0;font-size:.8rem}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:2px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+nav button{flex:1;border:0;background:none;padding:8px 2px;min-height:68px;font-size:.62rem;font-weight:700;color:var(--muted)}
+nav button .i{display:block;font-size:1.5rem}
+nav button.on{color:var(--brand);box-shadow:inset 0 4px 0 var(--brand)}
+.modal{position:fixed;inset:0;background:var(--bg);z-index:20;overflow:auto;padding:12px 16px 40px}
+.modal>.in{max-width:640px;margin:0 auto}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet>.in{background:var(--bg);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:16px;max-height:92vh;overflow:auto}
+ol.steps{padding-left:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 12px 12px 56px;margin:8px 0;position:relative}
+ol.steps li::before{content:counter(s);position:absolute;left:10px;top:10px;width:34px;height:34px;border-radius:50%;background:var(--brand);color:var(--brand-ink);font-weight:800;display:flex;align-items:center;justify-content:center}
+ul.ing{list-style:none;padding:0;margin:0}
+ul.ing li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+ul.ing .q{font-weight:700;white-space:nowrap}
+.shop{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.shop input{width:30px;height:30px;flex:none;accent-color:var(--brand)}
+.shop.got{text-decoration:line-through;opacity:.55}
+.toast{position:fixed;left:12px;right:12px;top:12px;z-index:40;background:var(--brand);color:var(--brand-ink);border-radius:16px;padding:14px;font-weight:700;max-width:616px;margin:0 auto;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+select,input[type=time],input[type=text],input[type=number],textarea{width:100%;min-height:48px;border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--card);margin:4px 0}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:52px;height:52px;border-radius:14px;border:2px solid var(--brand);background:var(--card);color:var(--brand);font-size:1.4rem;font-weight:800}
+.stepper b{min-width:3.2em;text-align:center}
+.bar{height:14px;border-radius:7px;background:var(--soft);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--brand)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{font-size:1.6rem;font-weight:800}
+details{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:6px 12px;margin:8px 0}
+summary{min-height:48px;display:flex;align-items:center;font-weight:700;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:.75rem}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.demo{background:var(--soft);border-radius:10px;padding:6px 10px;font-size:.75rem;margin:6px 0}
+:focus-visible{outline:4px solid #f59e0b;outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav"></nav>
+<div id="layer"></div>
+<script>
+/* =====================================================================
+   MI MENÚ — app de nutrición personalizada. Todo funciona en el móvil,
+   sin servidor ni cuentas. Los datos se guardan en el propio dispositivo.
+   Para editar recetas, ingredientes o sustituciones: ver README.md
+   ===================================================================== */
+
+/* ---------- 1. INGREDIENTES: clave:[nombre, categoría, unidad, pista] ---------- */
+const CAT={V:"🥦 Fruta y verdura",C:"🍗 Carne y pescado",L:"🥛 Huevos y lácteos",D:"🍞 Pan, pasta y legumbres",F:"❄️ Congelados",P:"🧂 Despensa (mira si ya tienes)"};
+const ING={
+ pan_int:["Pan integral",CAT.D,"g","1 rebanada ≈ 40 g"],tostadas_int:["Tostadas integrales",CAT.D,"g",""],
+ avena:["Copos de avena",CAT.D,"g",""],pasta_int:["Pasta integral",CAT.D,"g",""],arroz_int:["Arroz integral",CAT.D,"g",""],
+ lentejas:["Lentejas cocidas (bote)",CAT.D,"g",""],garbanzos:["Garbanzos cocidos (bote)",CAT.D,"g",""],alubias:["Alubias blancas cocidas (bote)",CAT.D,"g",""],
+ almendras:["Almendras sin sal",CAT.D,"g","un puñadito ≈ 15 g"],nueces:["Nueces",CAT.D,"g","2-3 nueces"],miel:["Miel",CAT.D,"cdta",""],
+ atun:["Atún al natural (lata)",CAT.D,"lata",""],caballa_lata:["Caballa al natural (lata)",CAT.D,"lata",""],
+ pavo_fiambre:["Pavo en lonchas, bajo en sal",CAT.C,"g","3-4 lonchas"],jamon_cocido:["Jamón cocido extra, bajo en sal",CAT.C,"g",""],
+ pechuga_pollo:["Pechuga de pollo",CAT.C,"g","un filete mediano ≈ 150 g"],pavo_filete:["Filete de pavo",CAT.C,"g",""],
+ merluza:["Merluza (lomos)",CAT.F,"g",""],bacalao:["Bacalao fresco o desalado",CAT.C,"g",""],salmon:["Salmón",CAT.C,"g",""],caballa:["Caballa fresca",CAT.C,"g",""],gambas:["Gambas peladas",CAT.F,"g",""],
+ huevo:["Huevo",CAT.L,"ud",""],leche:["Leche desnatada",CAT.L,"ml",""],bebida_soja:["Bebida de soja sin azúcar",CAT.L,"ml",""],leche_sl:["Leche sin lactosa desnatada",CAT.L,"ml",""],
+ yogur_nat:["Yogur natural sin azúcar",CAT.L,"ud",""],yogur_griego:["Yogur griego natural",CAT.L,"ud",""],kefir:["Kéfir natural",CAT.L,"ud",""],
+ queso_fresco:["Queso fresco batido 0%",CAT.L,"g",""],requeson:["Requesón",CAT.L,"g",""],skyr:["Skyr natural",CAT.L,"g",""],queso_light:["Queso en porciones light",CAT.L,"ud",""],
+ platano:["Plátano",CAT.V,"ud",""],manzana:["Manzana",CAT.V,"ud",""],pera:["Pera madura",CAT.V,"ud",""],kiwi:["Kiwi",CAT.V,"ud",""],mandarina:["Mandarina",CAT.V,"ud",""],naranja:["Naranja",CAT.V,"ud",""],limon:["Limón",CAT.V,"ud",""],
+ frutos_rojos:["Frutos rojos",CAT.F,"g",""],guisantes:["Guisantes",CAT.F,"g",""],
+ zanahoria:["Zanahoria",CAT.V,"ud",""],cebolla:["Cebolla",CAT.V,"g","media cebolla ≈ 50 g"],puerro:["Puerro",CAT.V,"g",""],pimiento:["Pimiento rojo",CAT.V,"g",""],
+ calabacin:["Calabacín",CAT.V,"g","uno mediano ≈ 250 g"],calabaza:["Calabaza",CAT.V,"g",""],berenjena:["Berenjena",CAT.V,"g",""],patata:["Patata",CAT.V,"g","una mediana ≈ 150 g"],boniato:["Boniato",CAT.V,"g",""],
+ judias:["Judías verdes",CAT.V,"g",""],espinacas:["Espinacas",CAT.V,"g",""],acelgas:["Acelgas",CAT.V,"g",""],brocoli:["Brócoli",CAT.V,"g",""],coliflor:["Coliflor",CAT.V,"g",""],
+ champi:["Champiñones",CAT.V,"g",""],lechuga:["Lechuga",CAT.V,"g",""],tomate:["Tomate natural",CAT.V,"ud","No le gusta"],
+ aove:["Aceite de oliva virgen extra",CAT.P,"cda",""],ajo:["Ajo",CAT.P,"ud",""],pimenton:["Pimentón dulce",CAT.P,"cdta",""],comino:["Comino",CAT.P,"cdta",""],canela:["Canela",CAT.P,"cdta",""],romero:["Romero",CAT.P,"cdta",""]
+};
+const STAPLES=new Set(["aove","ajo","pimenton","comino","canela","romero"]);
+
+/* ---------- 2. SUSTITUCIONES: ingrediente -> [alternativa, factor, nota] ---------- */
+const SUBS={
+ pechuga_pollo:[["pavo_filete",1,"Igual cantidad. Queda igual de jugoso si no lo pasas de cocción."]],
+ pavo_filete:[["pechuga_pollo",1,"Igual cantidad."]],
+ merluza:[["bacalao",1,"Igual cantidad. Si es desalado, no añadas sal."],["salmon",.8,"Más sabroso y saciante; algo más calórico, por eso un poco menos."]],
+ salmon:[["caballa",1,"Igual cantidad. Pescado azul también."],["merluza",1.2,"Más ligero; sube un poco la cantidad."]],
+ atun:[["caballa_lata",1,"Igual: una lata. Escurre bien el líquido."]],
+ caballa_lata:[["atun",1,"Igual: una lata."]],
+ gambas:[["merluza",1,"Pescado blanco troceado."]],
+ lentejas:[["garbanzos",1,"Igual cantidad."],["alubias",1,"Igual cantidad."]],
+ garbanzos:[["lentejas",1,"Igual cantidad."],["alubias",1,"Igual cantidad."]],
+ alubias:[["garbanzos",1,"Igual cantidad."],["lentejas",1,"Igual cantidad."]],
+ calabacin:[["berenjena",1,"Igual cantidad. Déjala más tiempo al horno."],["calabaza",1,"Queda más dulce."],["judias",1,"Cuécelas un poco más."]],
+ calabaza:[["calabacin",1,"Igual cantidad, queda menos dulce."],["zanahoria",1,"Unas 2 zanahorias grandes."]],
+ patata:[["boniato",1,"Igual cantidad, más dulce."],["arroz_int",.35,"Mucha menos cantidad: arroz seco."]],
+ espinacas:[["acelgas",1,"Igual cantidad."],["judias",1,"Cuécelas antes."]],
+ brocoli:[["coliflor",1,"Igual cantidad."],["judias",1,"Igual cantidad."]],
+ judias:[["brocoli",1,"Igual cantidad."],["calabacin",1,"Igual cantidad."]],
+ champi:[["calabacin",1,"Igual cantidad, en láminas."]],
+ cebolla:[["puerro",1,"Igual cantidad."]],
+ leche:[["bebida_soja",1,"Igual cantidad. Elige la que NO lleva azúcar."],["leche_sl",1,"Igual cantidad."]],
+ yogur_nat:[["yogur_griego",1,"Un yogur. Más cremoso y con más proteína."],["kefir",1,"Un kéfir."]],
+ yogur_griego:[["yogur_nat",1,"Un yogur natural."],["kefir",1,"Un kéfir."]],
+ queso_fresco:[["requeson",1,"Igual cantidad."],["skyr",1,"Igual cantidad; mucha proteína."]],
+ pavo_fiambre:[["jamon_cocido",1,"Elige el extra y bajo en sal."]],
+ pan_int:[["tostadas_int",.8,"Un poco menos: las tostadas pesan menos."]],
+ pasta_int:[["arroz_int",1,"Igual cantidad."]],
+ arroz_int:[["pasta_int",1,"Igual cantidad."]],
+ platano:[["pera",1,"Una pera madura."],["manzana",1,"Una manzana."]],
+ manzana:[["pera",1,"Una pera madura."],["platano",1,"Un plátano."]],
+ pera:[["manzana",1,"Mejor rallada o muy madura por la dentadura."],["kiwi",1,"Un kiwi."]],
+ kiwi:[["mandarina",1,"Una mandarina."],["naranja",.5,"Media naranja."]],
+ mandarina:[["naranja",.5,"Media naranja."],["kiwi",1,"Un kiwi."]],
+ naranja:[["mandarina",2,"Dos mandarinas."],["kiwi",1,"Un kiwi."]]
+};
+
+/* ---------- 3. RECETAS (cantidades por 1 persona) ----------
+   id, slot, nombre, min, dificultad(1 fácil,2 normal,3 elaborada), kcal, prot(g),
+   ing:[[clave,cantidad]], steps:[...], tip (Thermomix o truco), dent:true si hay que cuidar la dentadura */
+const R=[
+/* DESAYUNOS */
+{id:"d1",slot:"desayuno",name:"Tostada de pavo con aceite y kiwi",min:5,dif:1,kcal:310,prot:21,ing:[["pan_int",50],["aove",1],["pavo_fiambre",40],["kiwi",1],["leche",200]],
+ steps:["Tuesta el pan.","Échale un hilo de aceite de oliva y pon encima el pavo.","Calienta la leche y mézclala con tu café o infusión.","Pela el kiwi y tómalo aparte."]},
+{id:"d2",slot:"desayuno",name:"Yogur griego con avena y plátano",min:5,dif:1,kcal:290,prot:20,ing:[["yogur_griego",1],["avena",30],["platano",.5],["canela",1]],
+ steps:["Pon el yogur en un bol.","Añade la avena y mézclala.","Corta el plátano en rodajas y ponlo encima.","Espolvorea un poco de canela."],tip:"La avena queda más blanda si lo preparas la noche anterior y lo dejas en la nevera."},
+{id:"d3",slot:"desayuno",name:"Tortilla francesa con tostada y naranja",min:10,dif:1,kcal:330,prot:22,ing:[["huevo",2],["pan_int",40],["aove",.5],["naranja",1]],
+ steps:["Bate los huevos en un plato. No hace falta sal.","Pon media cucharada de aceite en la sartén y haz la tortilla 1-2 minutos por cada lado.","Tuesta el pan y acompaña.","Toma la naranja en gajos."]},
+{id:"d4",slot:"desayuno",name:"Gachas de avena con manzana",min:10,dif:1,kcal:290,prot:15,ing:[["avena",40],["leche",200],["manzana",.5],["canela",1]],
+ steps:["Pon la avena y la leche en un cazo a fuego medio.","Remueve 5 minutos hasta que espese.","Ralla la media manzana por encima (así es blanda para la dentadura).","Espolvorea canela."],tip:"Thermomix: avena y leche, 7 min · 90º · vel 2.",dent:true},
+{id:"d5",slot:"desayuno",name:"Tostada con queso fresco y miel",min:5,dif:1,kcal:300,prot:20,ing:[["pan_int",50],["queso_fresco",80],["miel",1],["pera",1],["leche",150]],
+ steps:["Tuesta el pan.","Unta el queso fresco por encima.","Añade la cucharadita de miel.","Acompaña con la pera y un café con leche."]},
+/* MEDIA MAÑANA */
+{id:"m1",slot:"media",name:"Yogur con pera",min:3,dif:1,kcal:150,prot:7,ing:[["yogur_nat",1],["pera",1]],steps:["Corta la pera en trocitos pequeños.","Mézclala con el yogur."],dent:true},
+{id:"m2",slot:"media",name:"Queso fresco con kiwi",min:3,dif:1,kcal:140,prot:13,ing:[["queso_fresco",100],["kiwi",1]],steps:["Pon el queso en un cuenco.","Pela el kiwi y córtalo en trocitos por encima."]},
+{id:"m3",slot:"media",name:"Mandarinas y almendras",min:2,dif:1,kcal:150,prot:4,ing:[["mandarina",2],["almendras",15]],steps:["Pela las mandarinas.","Toma las almendras con ellas, despacio."],tip:"Si las almendras te molestan con la dentadura, pícalas en trocitos o cámbialas por 2 nueces.",dent:true},
+{id:"m4",slot:"media",name:"Batido de leche y plátano",min:3,dif:1,kcal:150,prot:8,ing:[["leche",200],["platano",.5],["canela",1]],steps:["Pon todo en el vaso de la batidora.","Bate 30 segundos y bebe."],tip:"Thermomix: 20 seg · vel 7."},
+/* COMIDAS */
+{id:"c1",slot:"comida",name:"Lentejas estofadas con verduras y huevo",min:25,dif:1,kcal:470,prot:30,ing:[["lentejas",200],["zanahoria",1],["cebolla",40],["pimiento",50],["aove",1],["pimenton",1],["ajo",1],["huevo",1],["mandarina",1]],
+ steps:["Pica pequeño la cebolla, el pimiento y la zanahoria. Pon el huevo a cocer 10 minutos en otro cazo.","Sofríe las verduras con una cucharada de aceite y el ajo, 5 minutos.","Aparta del fuego, añade el pimentón y remueve unos segundos.","Añade las lentejas escurridas y un vaso de agua. Cocina 10 minutos.","Sirve con el huevo cocido troceado. De postre, la mandarina."],tip:"Thermomix: trocea verduras 5 seg · vel 5; sofríe 7 min · 120º · vel 1; añade lentejas y agua, 10 min · 100º · vel cuchara."},
+{id:"c2",slot:"comida",name:"Pollo al horno con patata y calabacín",min:45,dif:2,kcal:450,prot:38,ing:[["pechuga_pollo",150],["patata",150],["calabacin",100],["cebolla",50],["aove",1],["ajo",1],["romero",1]],
+ steps:["Enciende el horno a 200º.","Corta la patata en rodajas finas y el calabacín y la cebolla en tiras.","Ponlas en una bandeja con el aceite, el ajo y el romero. Hornea 15 minutos.","Añade el pollo en filetes y hornea 15-20 minutos más, hasta que esté dorado.","Comprueba que el pollo está bien hecho por dentro."],tip:"Con la freidora de aire: 180º, 25 minutos, moviendo a mitad."},
+{id:"c3",slot:"comida",name:"Merluza con judías verdes y patata",min:25,dif:1,kcal:400,prot:34,ing:[["merluza",160],["patata",100],["judias",150],["aove",1],["limon",.5]],
+ steps:["Cuece la patata en dados y las judías en agua unos 15 minutos.","Pon la merluza en una fuente con unas gotas de limón.","Cocínala en el microondas 4 minutos tapada, o en el horno 12 minutos a 180º.","Escurre las verduras y aliña con aceite y limón."],tip:"Thermomix: patata en el vaso con agua; judías y merluza en el Varoma, 20 min."},
+{id:"c4",slot:"comida",name:"Garbanzos con espinacas y huevo",min:20,dif:1,kcal:430,prot:27,ing:[["garbanzos",200],["espinacas",150],["huevo",1],["aove",1],["ajo",1],["comino",1]],
+ steps:["Dora el ajo laminado en una cucharada de aceite.","Añade las espinacas y rehógalas 3 minutos.","Añade los garbanzos escurridos y el comino. Cocina 5 minutos con un chorrito de agua.","Pon el huevo duro (10 min) troceado por encima."]},
+{id:"c5",slot:"comida",name:"Pasta integral con atún y calabacín",min:20,dif:1,kcal:460,prot:30,ing:[["pasta_int",60],["atun",1],["calabacin",100],["cebolla",40],["aove",1]],
+ steps:["Cuece la pasta en agua con muy poca sal, unos 10 minutos.","Sofríe la cebolla y el calabacín en dados con una cucharada de aceite.","Añade el atún escurrido y la pasta. Mezcla 1 minuto."]},
+{id:"c6",slot:"comida",name:"Arroz integral con pollo y verduras",min:40,dif:2,kcal:470,prot:32,ing:[["arroz_int",55],["pechuga_pollo",110],["pimiento",60],["guisantes",50],["cebolla",40],["aove",1]],
+ steps:["Trocea el pollo y dóralo en una cucharada de aceite.","Añade cebolla y pimiento picados, 5 minutos.","Añade el arroz y cubre con agua (dos dedos por encima).","Cocina 30 minutos a fuego suave. A mitad, añade los guisantes."],tip:"Thermomix: 35 min · 100º · vel cuchara con cestillo cerrado."},
+{id:"c7",slot:"comida",name:"Pavo a la plancha con puré de calabaza y brócoli",min:30,dif:1,kcal:420,prot:38,ing:[["pavo_filete",150],["calabaza",200],["brocoli",150],["aove",1]],
+ steps:["Cuece la calabaza en dados 12 minutos y tritúrala con un poco de agua de cocción.","Cuece el brócoli 6-8 minutos.","Haz el pavo a la plancha con unas gotas de aceite, 3 minutos por lado.","Sirve todo junto con un hilo de aceite."]},
+{id:"c8",slot:"comida",name:"Alubias blancas con verduras y pavo",min:25,dif:1,kcal:430,prot:30,ing:[["alubias",200],["zanahoria",1],["puerro",60],["judias",100],["pavo_fiambre",40],["aove",1],["pimenton",1]],
+ steps:["Pica el puerro y la zanahoria y rehógalos con el aceite 5 minutos.","Añade las judías verdes troceadas y un vaso de agua. Cocina 10 minutos.","Añade las alubias escurridas, el pimentón y el pavo en taquitos.","Cocina 5 minutos más."]},
+/* MERIENDAS */
+{id:"t1",slot:"merienda",name:"Yogur con frutos rojos",min:3,dif:1,kcal:130,prot:7,ing:[["yogur_nat",1],["frutos_rojos",80]],steps:["Saca los frutos rojos del congelador 10 minutos antes.","Mézclalos con el yogur."]},
+{id:"t2",slot:"merienda",name:"Tostada con queso fresco",min:3,dif:1,kcal:140,prot:11,ing:[["pan_int",30],["queso_fresco",50]],steps:["Tuesta el pan.","Unta el queso fresco."]},
+{id:"t3",slot:"merienda",name:"Pera con nueces",min:3,dif:1,kcal:160,prot:3,ing:[["pera",1],["nueces",15]],steps:["Pela y corta la pera.","Toma las nueces troceadas aparte o por encima."],dent:true},
+{id:"t4",slot:"merienda",name:"Yogur con avena y canela",min:3,dif:1,kcal:140,prot:8,ing:[["yogur_nat",1],["avena",20],["canela",1]],steps:["Pon el yogur en un cuenco.","Añade la avena y la canela y mezcla."]},
+/* CENAS */
+{id:"s1",slot:"cena",name:"Crema de calabacín con tortilla francesa",min:25,dif:1,kcal:350,prot:21,ing:[["calabacin",250],["patata",50],["cebolla",40],["queso_light",1],["huevo",2],["aove",1]],
+ steps:["Cuece el calabacín, la patata y la cebolla troceados 15 minutos en poca agua.","Tritura con el queso hasta que quede fina.","Haz una tortilla francesa con los 2 huevos."],tip:"Thermomix: verduras 15 min · 100º · vel 1; después tritura 1 min · vel 8."},
+{id:"s2",slot:"cena",name:"Tortilla de espinacas con ensalada",min:15,dif:1,kcal:340,prot:22,ing:[["huevo",2],["espinacas",100],["lechuga",80],["zanahoria",1],["pan_int",30],["aove",1]],
+ steps:["Saltea las espinacas 2 minutos con unas gotas de aceite.","Bate los huevos, mézclalos con las espinacas y cuaja la tortilla.","Prepara una ensalada de lechuga y zanahoria rallada, con aceite y limón o vinagre.","Acompaña con el pan."]},
+{id:"s3",slot:"cena",name:"Salmón al horno con brócoli",min:25,dif:1,kcal:380,prot:30,ing:[["salmon",120],["brocoli",150],["pan_int",30],["limon",.5],["aove",.5]],
+ steps:["Enciende el horno a 180º.","Pon el salmón en una fuente con limón y media cucharada de aceite. Hornea 12-15 minutos.","Cuece el brócoli 6-8 minutos.","Sirve con el pan."]},
+{id:"s4",slot:"cena",name:"Revuelto de champiñones y gambas",min:15,dif:1,kcal:340,prot:30,ing:[["huevo",2],["champi",120],["gambas",80],["aove",1],["pan_int",30]],
+ steps:["Saltea los champiñones laminados con el aceite 4 minutos.","Añade las gambas descongeladas 2 minutos.","Añade los huevos batidos y remueve hasta que cuajen.","Acompaña con el pan."]},
+{id:"s5",slot:"cena",name:"Crema de verduras con pavo a la plancha",min:30,dif:1,kcal:340,prot:32,ing:[["puerro",60],["zanahoria",1],["calabacin",150],["pavo_filete",120],["aove",1]],
+ steps:["Cuece el puerro, la zanahoria y el calabacín troceados 15 minutos.","Tritura la crema.","Haz el pavo a la plancha 3 minutos por lado.","Sirve la crema con un hilo de aceite y el pavo al lado."],tip:"Thermomix: verduras 15 min · 100º · vel 1; tritura 1 min · vel 8."},
+{id:"s6",slot:"cena",name:"Sopa de verduras con huevo y pavo",min:25,dif:1,kcal:310,prot:25,ing:[["puerro",60],["zanahoria",1],["judias",100],["huevo",1],["pavo_fiambre",40],["pan_int",30]],
+ steps:["Cuece el puerro, la zanahoria y las judías troceados 15 minutos en un litro de agua.","Añade el huevo cocido troceado y el pavo en tiras.","Sirve caliente con el pan tostado."]},
+{id:"s7",slot:"cena",name:"Merluza a la plancha con ensalada",min:15,dif:1,kcal:320,prot:33,ing:[["merluza",160],["lechuga",100],["zanahoria",1],["limon",.5],["aove",1],["pan_int",30]],
+ steps:["Haz la merluza a la plancha 3-4 minutos por lado.","Prepara una ensalada de lechuga y zanahoria rallada.","Aliña con aceite y limón.","Acompaña con el pan."]}
+];
+const SLOTS={desayuno:{n:"Desayuno",i:"☕"},media:{n:"Media mañana",i:"🍎"},comida:{n:"Comida",i:"🍲"},merienda:{n:"Merienda",i:"🥛"},cena:{n:"Cena",i:"🌙"}};
+const ORDER=["desayuno","media","comida","merienda","cena"];
+const OFF={desayuno:0,media:1,comida:2,merienda:3,cena:4};
+const INC=["Dolor de rodilla o cadera","Mareo","No me sentó bien","Ganas de picar","Otra cosa"];
+const DIF=["","Fácil","Normal","Elaborada"];
+
+/* ---------- 4. ESTADO Y GUARDADO ---------- */
+const KEY="mimenu_v1";
+const DEF={settings:{name:"",meals:5,portion:1,people:1,maxDif:2,excluded:["tomate"],times:{desayuno:"07:30",media:"10:30",comida:"13:45",merienda:"16:45",cena:"19:45"},remind:{on:false,lead:10},font:3,contrast:false,pin:"1234"},log:{},weights:[],overrides:{},subs:{},shop:{},adaptLog:[],demo:true};
+let S;
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.settings){S=j;S.settings={...DEF.settings,...S.settings,remind:{...DEF.settings.remind,...S.settings.remind},times:{...DEF.settings.times,...S.settings.times}};return}}catch(e){}
+ S=JSON.parse(JSON.stringify(DEF));seedDemo();save()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const $=s=>document.querySelector(s);
+const esc=t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- 5. FECHAS ---------- */
+const pad=n=>String(n).padStart(2,"0");
+const dk=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pd=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
+const addD=(k,n)=>{const d=pd(k);d.setDate(d.getDate()+n);return dk(d)};
+const DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const longDate=k=>{const d=pd(k);return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`};
+const today=()=>dk(new Date());
+const mondayOf=k=>{const d=pd(k);return addD(k,-((d.getDay()+6)%7))};
+
+/* ---------- 6. PLAN SEMANAL (automático, determinista y editable) ---------- */
+const hasExcluded=r=>r.ing.some(([k])=>S.settings.excluded.includes(k));
+function pool(slot){let p=R.filter(r=>r.slot===slot&&!hasExcluded(r));let q=p.filter(r=>r.dif<=S.settings.maxDif);return q.length?q:(p.length?p:R.filter(r=>r.slot===slot))}
+function activeSlots(){const m=S.settings.meals;return m>=5?ORDER:m===4?["desayuno","comida","merienda","cena"]:["desayuno","comida","cena"]}
+function recipe(id){return R.find(r=>r.id===id)}
+function planFor(k){const d=pd(k);const dow=(d.getDay()+6)%7;const wk=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5-dow)/7);const out={};
+ for(const s of activeSlots()){const ov=S.overrides[k]&&S.overrides[k][s];if(ov&&recipe(ov)){out[s]=recipe(ov);continue}const p=pool(s);out[s]=p[(wk*3+dow+OFF[s])%p.length]}return out}
+
+/* ---------- 7. CANTIDADES Y SUSTITUCIONES ---------- */
+function resolve(key,q){const sb=S.subs[key];if(sb&&SUBS[key]){const a=SUBS[key].find(x=>x[0]===sb);if(a)return[a[0],q*a[1]]}return[key,q]}
+function scale(){return S.settings.portion}
+function fmt(u,q){if(u==="g"||u==="ml"){const v=q>=50?Math.round(q/10)*10:Math.round(q/5)*5;if(v>=1000)return(v/1000).toFixed(2).replace(/0+$/,"").replace(/\.$/,"").replace(".",",")+(u==="g"?" kg":" l");return v+" "+u}
+ const r=Math.max(.5,Math.round(q*2)/2);const n=Math.floor(r);const s=(n?n:"")+(n&&r%1?" ":"")+(r%1?"½":"");const lab={ud:["unidad","unidades"],cda:["cucharada","cucharadas"],cdta:["cucharadita","cucharaditas"],lata:["lata","latas"]}[u];return s+" "+(r<=1?lab[0]:lab[1])}
+function shopFmt(u,q){if(u==="g"||u==="ml"){const v=Math.ceil(q/50)*50;return v>=1000?(v/1000).toString().replace(".",",")+(u==="g"?" kg":" l"):v+" "+u}
+ const n=Math.ceil(q-.001);const lab={ud:["unidad","unidades"],cda:["cucharada","cucharadas"],cdta:["cucharadita","cucharaditas"],lata:["lata","latas"]}[u];return n+" "+(n===1?lab[0]:lab[1])}
+
+/* ---------- 8. REGISTRO ---------- */
+const dayLog=k=>(S.log[k]=S.log[k]||{done:{},skip:{},water:0});
+function seedDemo(){const t=today();const hung=[2,5],tired=[3];
+ for(let i=10;i>=1;i--){const k=addD(t,-i);const l=dayLog(k);const slots=ORDER;slots.forEach((s,j)=>{if((i*7+j*3)%11===0){l.skip[s]=true;return}
+  l.done[s]={t:SLOTS[s].n&&DEF.settings.times[s],energy:tired.includes(i)&&s==="comida"?"cansada":(i+j)%4===0?"regular":"bien",hunger:hung.includes(i)&&s==="media"?"mucha":"normal",inc:(i===4&&s==="comida")?["Dolor de rodilla o cadera"]:[],note:""}});l.water=4+(i%4)}
+  S.weights=[{date:"2026-10-02",kg:84.0},{date:"2026-10-16",kg:83.6},{date:"2026-10-30",kg:83.3},{date:"2026-11-06",kg:83.0}]}
+
+/* ---------- 9. ADAPTACIÓN AUTOMÁTICA (reglas simples, reversibles, solo cambios pequeños) ---------- */
+function lastDays(n){const t=today();return Array.from({length:n},(_,i)=>addD(t,-i))}
+function adapt(){const last=S.adaptLog.length?S.adaptLog[S.adaptLog.length-1].date:"";if(last&&last>addD(today(),-7))return;
+ let hunger=0,tired=0,lowE=0,skips=0;lastDays(7).forEach(k=>{const l=S.log[k];if(!l)return;skips+=Object.keys(l.skip||{}).length;Object.values(l.done).forEach(d=>{if(d.hunger==="mucha")hunger++;if(d.energy==="cansada"){tired++;lowE++}})});
+ const st=S.settings,add=(msg,key,prev)=>S.adaptLog.push({date:today(),msg,key,prev});
+ if(hunger>=3&&st.meals<5){add("Ha tenido mucha hambre 3 o más veces esta semana: pasamos a 5 comidas al día.","meals",st.meals);st.meals=5}
+ else if(tired>=3&&st.maxDif>1){add("Ha estado cansada varias veces: simplificamos las recetas (solo fáciles).","maxDif",st.maxDif);st.maxDif=1}
+ else if(lowE>=3&&st.portion<1.1){add("Poca energía repetida: subimos un poco las raciones (+10 %). Conviene avisar al médico si continúa.","portion",st.portion);st.portion=Math.round((st.portion+.1)*10)/10}
+ else if(skips>=6){add("Se ha saltado muchas comidas: revisa horarios o dificultad en el panel familiar.","none",null)}
+ save()}
+function alerts(){const out=[];lastDays(7).forEach(k=>{const l=S.log[k];if(!l)return;Object.entries(l.done).forEach(([s,d])=>(d.inc||[]).forEach(i=>{if(i==="Mareo"||i==="Dolor de rodilla o cadera"||i==="No me sentó bien")out.push({k,s,i,note:d.note})}))});return out}
+
+/* ---------- 10. VISTAS ---------- */
+let view="hoy",supOpen=false,shopWeek=0,editWeek=0,subPick="";
+const NAV=[["hoy","🍽️","Hoy"],["semana","📅","Semana"],["compra","🛒","Compra"],["sustituir","🔄","Sustituir"],["mas","⚙️","Más"]];
+function render(){document.documentElement.style.setProperty("--fs",[18,20,22,25,28][S.settings.font]+"px");document.documentElement.dataset.contrast=S.settings.contrast?"high":"";
+ $("#nav").innerHTML=NAV.map(([v,i,t])=>`<button class="${view===v?"on":""}" data-act="nav" data-v="${v}" aria-label="${t}"><span class="i">${i}</span>${t}</button>`).join("");
+ const f={hoy:vHoy,semana:vSemana,compra:vCompra,sustituir:vSustituir,mas:vMas}[view];$("#app").innerHTML=f();window.scrollTo(0,0)}
+
+function nextSlot(plan,k){const now=new Date();const hm=pad(now.getHours())+":"+pad(now.getMinutes());const l=dayLog(k);const sl=Object.keys(plan);
+ for(const s of sl){if(!l.done[s]&&!l.skip[s]&&S.settings.times[s]>=addMin(hm,-60))return s}return sl.find(s=>!l.done[s]&&!l.skip[s])||null}
+function addMin(hm,n){let [h,m]=hm.split(":").map(Number);let t=Math.max(0,h*60+m+n);return pad(Math.floor(t/60))+":"+pad(t%60)}
+
+function vHoy(){const k=today(),plan=planFor(k),l=dayLog(k),sl=Object.keys(plan);const done=sl.filter(s=>l.done[s]).length;const nx=nextSlot(plan,k);
+ const h=new Date().getHours();const hi=h<13?"Buenos días":h<20?"Buenas tardes":"Buenas noches";
+ let h1=`<p class="sub">${longDate(k)}</p><h1>${hi}${S.settings.name?", "+esc(S.settings.name):""}</h1>`;
+ if(nx){const r=plan[nx];h1+=`<div class="card hero"><div class="sub">Ahora te toca · ${SLOTS[nx].n} · ${S.settings.times[nx]}</div><h1>${SLOTS[nx].i} ${esc(r.name)}</h1><div class="sub">⏱ ${r.min} min · ${DIF[r.dif]}</div><button class="btn" data-act="recipe" data-d="${k}" data-s="${nx}">Ver cómo se hace</button></div>`}
+ else h1+=`<div class="card hero"><h1>¡Hoy lo has hecho muy bien! 🎉</h1><div class="sub">Has completado todas tus comidas.</div></div>`;
+ h1+=`<div class="card"><div class="row"><div class="grow"><b>Tu día</b><div class="sub">${done} de ${sl.length} comidas</div></div>${streak()>1?`<span class="tag">🔥 ${streak()} días seguidos</span>`:""}</div><div class="bar" style="margin-top:8px"><i style="width:${done/sl.length*100}%"></i></div><div style="margin-top:8px"><b>${cheer(done,sl.length)}</b></div></div>`;
+ h1+=sl.map(s=>{const r=plan[s],ok=l.done[s],sk=l.skip[s];return `<div class="card meal ${ok?"done":""}"><div class="ico">${SLOTS[s].i}</div><div class="grow" data-act="recipe" data-d="${k}" data-s="${s}"><div class="sub">${SLOTS[s].n} · ${S.settings.times[s]}</div><div class="name">${esc(r.name)}</div>${sk?`<span class="tag">Me lo salté</span>`:""}</div><button class="check ${ok?"on":""}" data-act="done" data-d="${k}" data-s="${s}" aria-label="Marcar ${SLOTS[s].n} como hecho">${ok?"✓":""}</button></div>`}).join("");
+ h1+=`<div class="card"><b>💧 Agua de hoy</b><div class="sub">Intenta llegar a 6-8 vasos, poco a poco.</div><div class="stepper" style="margin-top:8px"><button data-act="water" data-n="-1" aria-label="Quitar un vaso">−</button><b>${l.water||0} 🥛</b><button data-act="water" data-n="1" aria-label="Añadir un vaso">+</button></div></div>`;
+ h1+=`<div class="notice">Menú orientativo. Si te mareas o encuentras mal, para y avisa a tu familia o a tu médico.</div>`;return h1}
+
+/* Motivación: racha de días (≥ la mitad de las comidas hechas) y mensaje de ánimo */
+function streak(){let n=0;const t=today(),need=Math.ceil(activeSlots().length/2);for(let i=0;i<60;i++){const l=S.log[addD(t,-i)];const c=l?Object.keys(l.done).length:0;if(c>=need)n++;else if(i===0)continue;else break}return n}
+function cheer(d,n){if(d===0)return"Empieza por lo que toca ahora. ¡Tú puedes! 💪";if(d>=n)return"¡Día completo! Estás creando un buen hábito 🌟";if(d>=n/2)return"¡Vas muy bien! Ya más de la mitad 👏";return"¡Buen comienzo! Sigue así 😊"}
+/* Recordatorios gratuitos: archivo de calendario (.ics) que el móvil importa; suena aunque la app esté cerrada */
+function makeICS(){const st=S.settings,d=today().replace(/-/g,""),mon=mondayOf(today()).replace(/-/g,"");const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Mi Menu//ES//","CALSCALE:GREGORIAN"];
+ const ev=(id,title,hm,rule,date)=>L.push("BEGIN:VEVENT","UID:"+id+"@mimenu","DTSTAMP:"+d+"T000000Z","DTSTART:"+date+"T"+hm.replace(":","")+"00","DURATION:PT15M","RRULE:"+rule,"SUMMARY:"+title,"DESCRIPTION:Abre Mi Menu para ver que toca","BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+title,"TRIGGER:-PT"+st.remind.lead+"M","END:VALARM","END:VEVENT");
+ activeSlots().forEach(s=>ev("slot-"+s,"Mi Menu: "+SLOTS[s].n,st.times[s],"FREQ=DAILY",d));
+ ev("repaso","Mi Menu: repasa tu dia y marca lo que has comido","21:00","FREQ=DAILY",d);
+ ev("peso","Mi Menu: pesate y apunta tu peso","07:15","FREQ=WEEKLY;BYDAY=MO",mon);
+ L.push("END:VCALENDAR");return L.join("\r\n")}
+function vSemana(){const k0=today(),mon=mondayOf(addD(k0,editWeek*7));let h=`<h1>Mi semana</h1><div class="row"><button class="btn alt small" data-act="wk" data-n="-1">← Anterior</button><button class="btn alt small" data-act="wk" data-n="0">Esta semana</button><button class="btn alt small" data-act="wk" data-n="1">Siguiente →</button></div>`;
+ for(let i=0;i<7;i++){const k=addD(mon,i),plan=planFor(k),isT=k===k0;h+=`<details ${isT?"open":""}><summary>${isT?"⭐ ":""}${longDate(k)}</summary>${Object.entries(plan).map(([s,r])=>`<div class="meal" style="padding:8px 0;border-top:1px solid var(--line)" data-act="recipe" data-d="${k}" data-s="${s}"><div class="ico">${SLOTS[s].i}</div><div class="grow"><div class="sub">${SLOTS[s].n} · ${S.settings.times[s]}</div><div class="name">${esc(r.name)}</div></div><div>›</div></div>`).join("")}</details>`}
+ return h}
+
+function shopData(){const mon=mondayOf(addD(today(),shopWeek*7));const tot={};const stp=new Set();
+ for(let i=0;i<7;i++){const plan=planFor(addD(mon,i));Object.values(plan).forEach(r=>r.ing.forEach(([k,q])=>{const [rk,rq]=resolve(k,q);if(STAPLES.has(rk)){stp.add(rk);return}tot[rk]=(tot[rk]||0)+rq*scale()*S.settings.people}))}
+ return{mon,tot,stp}}
+function vCompra(){const {mon,tot,stp}=shopData();const wk="s"+mon;const chk=S.shop[wk]=S.shop[wk]||{};const groups={};Object.entries(tot).forEach(([k,q])=>{(groups[ING[k][1]]=groups[ING[k][1]]||[]).push([k,q])});
+ let h=`<h1>Lista de la compra</h1><p class="sub">Semana del ${pd(mon).getDate()} de ${MESES[pd(mon).getMonth()]} · para ${S.settings.people} ${S.settings.people===1?"persona":"personas"} · Mercadona o Aldi</p><div class="row"><button class="btn alt small" data-act="shopwk" data-n="0">Esta semana</button><button class="btn alt small" data-act="shopwk" data-n="1">Próxima semana</button></div>`;
+ let total=0,got=0;
+ [CAT.V,CAT.C,CAT.L,CAT.D,CAT.F].forEach(c=>{const g=groups[c];if(!g)return;g.sort((a,b)=>ING[a[0]][0].localeCompare(ING[b[0]][0]));h+=`<h2>${c}</h2><div class="card" style="padding:4px 14px">`+g.map(([k,q])=>{total++;const on=chk[k];if(on)got++;return `<label class="shop ${on?"got":""}"><input type="checkbox" data-act="shopck" data-w="${wk}" data-k="${k}" ${on?"checked":""}><span class="grow"><b>${esc(ING[k][0])}</b>${ING[k][3]?`<div class="sub">${esc(ING[k][3])}</div>`:""}</span><b>${shopFmt(ING[k][2],q)}</b></label>`}).join("")+`</div>`});
+ if(stp.size)h+=`<h2>${CAT.P}</h2><div class="card">${[...stp].map(k=>`<span class="chip">${esc(ING[k][0])}</span>`).join("")}</div>`;
+ h+=`<div class="card"><b>Llevas ${got} de ${total}</b><div class="bar" style="margin-top:8px"><i style="width:${total?got/total*100:0}%"></i></div></div><button class="btn" data-act="share">📤 Enviar la lista (WhatsApp)</button><button class="btn alt" data-act="copy">📋 Copiar la lista</button>`;return h}
+function shopText(){const {mon,tot,stp}=shopData();let t="🛒 Lista de la compra\n";const g={};Object.entries(tot).forEach(([k,q])=>(g[ING[k][1]]=g[ING[k][1]]||[]).push(`• ${ING[k][0]}: ${shopFmt(ING[k][2],q)}`));Object.entries(g).forEach(([c,a])=>t+=`\n${c}\n${a.join("\n")}\n`);if(stp.size)t+=`\n${CAT.P}\n${[...stp].map(k=>ING[k][0]).join(", ")}`;return t}
+
+function vSustituir(){const used=[...new Set(R.flatMap(r=>r.ing.map(x=>x[0])))].filter(k=>SUBS[k]).sort((a,b)=>ING[a][0].localeCompare(ING[b][0]));
+ let h=`<h1>No tengo un ingrediente</h1><p class="sub">Toca el que te falta y te digo con qué cambiarlo.</p>`;
+ h+=`<div class="card">`+used.map(k=>`<button class="chip ${subPick===k?"on":""}" data-act="pick" data-k="${k}">${esc(ING[k][0])}${S.subs[k]?" ✓":""}</button>`).join("")+`</div>`;
+ if(subPick){h+=`<h2>En vez de ${esc(ING[subPick][0])} puedes usar:</h2>`+SUBS[subPick].map(([a,f,n])=>`<div class="card"><b>${esc(ING[a][0])}</b><div class="sub">${esc(n)}</div><button class="btn ${S.subs[subPick]===a?"":"alt"}" data-act="usesub" data-k="${subPick}" data-a="${a}">${S.subs[subPick]===a?"✓ Lo estoy usando":"Usar este"}</button></div>`).join("")+(S.subs[subPick]?`<button class="btn danger" data-act="unsub" data-k="${subPick}">Volver al ingrediente de siempre</button>`:"")}
+ const act=Object.entries(S.subs);if(act.length)h+=`<h2>Cambios activos</h2><div class="card">${act.map(([k,a])=>`<div class="row" style="padding:6px 0"><div class="grow">${esc(ING[k][0])} → <b>${esc(ING[a][0])}</b></div><button class="btn danger small" data-act="unsub" data-k="${k}">Quitar</button></div>`).join("")}<div class="sub">Se aplican en las recetas y en la lista de la compra.</div></div>`;return h}
+
+function vMas(){const st=S.settings;if(supOpen)return vSup();
+ return `<h1>Más</h1><div class="card"><b>Tamaño de letra</b><div class="stepper" style="margin-top:8px"><button data-act="font" data-n="-1" aria-label="Letra más pequeña">A−</button><b>${["Pequeña","Normal","Grande","Muy grande","Enorme"][st.font]}</b><button data-act="font" data-n="1" aria-label="Letra más grande">A+</button></div><button class="btn ${st.contrast?"":"alt"}" data-act="contrast">${st.contrast?"✓ Alto contraste activado":"Activar alto contraste"}</button></div>
+ <button class="btn" data-act="ics">🔔 Poner recordatorios en el móvil</button>
+ <button class="btn alt" data-act="hist">📝 Mi registro de estos días</button>
+ <button class="btn alt" data-act="weight">⚖️ Apuntar mi peso</button>
+ <button class="btn alt" data-act="help">❓ ¿Cómo funciona esto?</button>
+ <button class="btn" data-act="supgo">👨‍👩‍👧 Panel de la familia</button>
+ <div class="notice">Este menú es orientativo y está pendiente de que lo valide su médico o nutricionista. No sustituye ninguna indicación médica.</div>`}
+
+/* ---------- 11. PANEL FAMILIAR ---------- */
+function stats(){let planned=0,done=0,skip=0;lastDays(7).forEach(k=>{const l=S.log[k];const n=activeSlots().length;planned+=n;if(l){done+=Object.keys(l.done).length;skip+=Object.keys(l.skip).length}});return{planned,done,skip,pct:planned?Math.round(done/planned*100):0}}
+function dayKcal(k){return Math.round(Object.values(planFor(k)).reduce((a,r)=>a+r.kcal,0)*S.settings.portion)}
+function chart(){const w=[...S.weights].sort((a,b)=>a.date.localeCompare(b.date));if(w.length<2)return `<div class="sub">Aún no hay suficientes pesos.</div>`;const min=Math.min(...w.map(x=>x.kg))-.5,max=Math.max(...w.map(x=>x.kg))+.5;const W=300,H=110;const pts=w.map((x,i)=>[10+i*(W-20)/(w.length-1),H-10-(x.kg-min)/(max-min)*(H-30)]);
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolución del peso"><polyline fill="none" stroke="var(--brand)" stroke-width="3" points="${pts.map(p=>p.join(",")).join(" ")}"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--brand)"/><text x="${p[0]}" y="${p[1]-8}" font-size="10" text-anchor="middle" fill="currentColor">${w[i].kg}</text>`).join("")}</svg>`}
+function vSup(){const st=S.settings,s=stats(),al=alerts();const mon=mondayOf(addD(today(),editWeek*7));
+ let h=`<div class="row"><h1 class="grow">Panel de la familia</h1><button class="btn alt small" data-act="supout">Salir</button></div>`;
+ if(S.demo)h+=`<div class="demo">Hay datos de ejemplo cargados (registro y pesos inventados). <button class="btn small alt" data-act="cleardemo">Borrar datos de ejemplo</button></div>`;
+ h+=`<div class="notice"><b>Pendiente:</b> el plan (≈ ${dayKcal(today())} kcal/día) debe validarlo un médico o nutricionista antes de aplicarlo. El plan está pensado como un déficit moderado.</div>`;
+ if(al.length)h+=`<div class="card" style="border-color:var(--bad)"><b>⚠️ Avisos de la última semana</b>${al.map(a=>`<div class="sub">${longDate(a.k)} · ${SLOTS[a.s].n}: <b>${esc(a.i)}</b></div>`).join("")}<div class="sub">Si hay mareos repetidos, consulta con su médico.</div></div>`;
+ if(S.adaptLog.length)h+=`<details><summary>🔧 Cambios automáticos (${S.adaptLog.length})</summary>${S.adaptLog.slice().reverse().map((a,i)=>`<div style="padding:6px 0;border-top:1px solid var(--line)"><div class="sub">${longDate(a.date)}</div>${esc(a.msg)}${a.key!=="none"?`<br><button class="btn small alt" data-act="undo" data-i="${S.adaptLog.length-1-i}">Deshacer</button>`:""}</div>`).join("")}</details>`;
+ h+=`<div class="grid2"><div class="card"><div class="sub">Cumplimiento 7 días</div><div class="kpi">${s.pct}%</div><div class="sub">${s.done}/${s.planned} · ${s.skip} saltadas</div></div><div class="card"><div class="sub">Último peso</div><div class="kpi">${[...S.weights].sort((a,b)=>b.date.localeCompare(a.date))[0]?.kg||"—"} kg</div><div class="sub">objetivo: bajar poco a poco</div></div></div><div class="card"><b>Peso</b>${chart()}</div>`;
+ h+=`<details><summary>🍽️ Comidas, raciones y horarios</summary>
+ <b>Comidas al día</b><div>${[3,4,5].map(n=>`<button class="chip ${st.meals===n?"on":""}" data-act="meals" data-n="${n}">${n}</button>`).join("")}</div>
+ <b>Raciones</b><div class="stepper"><button data-act="portion" data-n="-0.1">−</button><b>${Math.round(st.portion*100)}%</b><button data-act="portion" data-n="0.1">+</button></div><div class="sub">Entre 80 % y 120 %. Cambiar raciones cambia calorías: coméntalo con el nutricionista.</div>
+ <b>Personas para las que se cocina</b><div class="stepper"><button data-act="people" data-n="-1">−</button><b>${st.people}</b><button data-act="people" data-n="1">+</button></div>
+ <b>Dificultad máxima de recetas</b><div>${[1,2,3].map(n=>`<button class="chip ${st.maxDif===n?"on":""}" data-act="dif" data-n="${n}">${DIF[n]}</button>`).join("")}</div>
+ <b>Horarios</b>${ORDER.map(o=>`<label class="sub">${SLOTS[o].i} ${SLOTS[o].n}<input type="time" value="${st.times[o]}" data-act="time" data-s="${o}"></label>`).join("")}</details>`;
+ h+=`<details><summary>🚫 Alimentos excluidos</summary><div class="sub">Toca para excluir o permitir. Las recetas con un alimento excluido no se proponen.</div>${[...new Set(R.flatMap(r=>r.ing.map(x=>x[0])).concat(st.excluded))].filter(k=>!STAPLES.has(k)).sort((a,b)=>ING[a][0].localeCompare(ING[b][0])).map(k=>`<button class="chip ${st.excluded.includes(k)?"off":""}" data-act="excl" data-k="${k}">${st.excluded.includes(k)?"🚫 ":""}${esc(ING[k][0])}</button>`).join("")}</details>`;
+ h+=`<details><summary>📅 Editar el plan de la semana</summary><div class="row"><button class="btn alt small" data-act="wk" data-n="-1">←</button><button class="btn alt small" data-act="wk" data-n="1">→</button><span class="sub">Semana del ${pd(mon).getDate()}/${pd(mon).getMonth()+1}</span></div>`+
+ Array.from({length:7},(_,i)=>{const k=addD(mon,i),plan=planFor(k);return `<div style="border-top:1px solid var(--line);padding:6px 0"><b>${longDate(k)}</b> <span class="sub">${dayKcal(k)} kcal</span>${Object.entries(plan).map(([sl,r])=>`<label class="sub">${SLOTS[sl].n}<select data-act="override" data-d="${k}" data-s="${sl}">${R.filter(x=>x.slot===sl).map(x=>`<option value="${x.id}" ${x.id===r.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select></label>`).join("")}</div>`}).join("")+`<button class="btn danger small" data-act="resetplan">Restablecer plan automático</button></details>`;
+ h+=`<details><summary>🔔 Recordatorios</summary><button class="btn ${st.remind.on?"":"alt"}" data-act="remind">${st.remind.on?"✓ Activados":"Activar recordatorios"}</button><label class="sub">Avisar antes de la comida<select data-act="lead">${[0,5,10,15,30].map(n=>`<option value="${n}" ${st.remind.lead===n?"selected":""}>${n===0?"A la hora":n+" minutos antes"}</option>`).join("")}</select></label><button class="btn" data-act="ics">🔔 Crear recordatorios en el calendario del móvil</button><div class="sub">Gratis y sin servicios externos: se descarga un archivo y el móvil lo añade a su Calendario. Suena aunque la app esté cerrada. Si cambias los horarios, vuelve a crearlo y borra los eventos “Mi Menu” antiguos.</div></details>`;
+ h+=`<details><summary>📋 Registro detallado</summary>${logTable()}</details>`;
+ h+=`<details><summary>🔒 Perfil y datos</summary><label class="sub">Nombre (opcional)<input type="text" value="${esc(st.name)}" data-act="name"></label><label class="sub">PIN del panel<input type="text" inputmode="numeric" value="${esc(st.pin)}" data-act="pin"></label><button class="btn alt" data-act="export">⬇️ Guardar copia de seguridad</button><label class="btn alt" style="cursor:pointer">⬆️ Cargar copia<input type="file" accept=".json" data-act="import" hidden></label><button class="btn danger" data-act="reset">Borrar todo y empezar de cero</button></details>`;
+ return h}
+function logTable(){const rows=lastDays(10).map(k=>{const l=S.log[k];if(!l)return "";const p=Object.entries(l.done);return `<tr><td>${longDate(k).split(" de ")[0]}</td><td>${p.length}✓ ${Object.keys(l.skip).length?Object.keys(l.skip).length+"✗":""}</td><td>${[...new Set(p.flatMap(([_,d])=>(d.inc||[]).concat(d.hunger==="mucha"?["Hambre"]:[],d.energy==="cansada"?["Cansada"]:[])))].join(", ")||"—"}</td></tr>`}).join("");return `<table><tr><th>Día</th><th>Comidas</th><th>Incidencias</th></tr>${rows}</table>`}
+
+/* ---------- 12. RECETA Y HOJAS ---------- */
+function openRecipe(k,s){const plan=planFor(k),r=plan[s];if(!r)return;const l=dayLog(k);
+ const items=r.ing.map(([key,q])=>{const [rk,rq]=resolve(key,q);const swapped=rk!==key;return `<li><span>${esc(ING[rk][0])}${swapped?` <span class="tag">cambiado</span>`:""}${ING[rk][3]?`<div class="sub">${esc(ING[rk][3])}</div>`:""}</span><span class="row"><span class="q">${fmt(ING[rk][2],rq*scale()*(S.settings.people>1?1:1))}</span>${SUBS[key]?`<button class="btn alt small" style="margin:0" data-act="subfor" data-k="${key}" aria-label="Cambiar ${esc(ING[key][0])}">🔄</button>`:""}</span></li>`}).join("");
+ $("#layer").innerHTML=`<div class="modal"><div class="in"><button class="btn alt small" data-act="close">← Volver</button><div class="sub">${SLOTS[s].i} ${SLOTS[s].n} · ${longDate(k)}</div><h1>${esc(r.name)}</h1><div><span class="tag">⏱ ${r.min} min</span><span class="tag">${DIF[r.dif]}</span></div>
+ ${r.dent?`<div class="notice">🦷 Si algún trozo te molesta con la dentadura, córtalo más pequeño o ráyalo.</div>`:""}
+ <h2>Ingredientes${S.settings.people>1?` (por persona; cocinas para ${S.settings.people})`:""}</h2><ul class="ing">${items}</ul>
+ <h2>Cómo se hace</h2><ol class="steps">${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>${r.tip?`<div class="card">💡 ${esc(r.tip)}</div>`:""}
+ <button class="btn alt" data-act="speak" data-d="${k}" data-s="${s}">🔊 Leer en voz alta</button>
+ <button class="btn ${l.done[s]?"alt":""}" data-act="done" data-d="${k}" data-s="${s}" data-close="1">${l.done[s]?"✓ Ya lo he comido (quitar)":"✅ Ya lo he comido"}</button></div></div>`}
+function openFeel(k,s){const l=dayLog(k),d=l.done[s];if(!d)return;
+ $("#layer").innerHTML=`<div class="sheet"><div class="in"><h1>¿Cómo te encuentras?</h1><b>Energía</b><div id="fe">${[["bien","😀 Bien"],["regular","😐 Regular"],["cansada","😫 Cansada"]].map(([v,t])=>`<button class="chip ${d.energy===v?"on":""}" data-act="fset" data-f="energy" data-v="${v}">${t}</button>`).join("")}</div><b>Hambre</b><div>${[["poca","🙂 Poca"],["normal","😐 Normal"],["mucha","😋 Mucha"]].map(([v,t])=>`<button class="chip ${d.hunger===v?"on":""}" data-act="fset" data-f="hunger" data-v="${v}">${t}</button>`).join("")}</div><b>¿Algo que contar?</b><div>${INC.map(v=>`<button class="chip ${(d.inc||[]).includes(v)?"on":""}" data-act="finc" data-v="${esc(v)}">${v}</button>`).join("")}</div><textarea id="fnote" rows="2" placeholder="Escribe aquí si quieres…">${esc(d.note||"")}</textarea><button class="btn" data-act="fsave">Listo</button></div></div>`;feelCtx={k,s}}
+let feelCtx=null;
+function sheetHelp(){$("#layer").innerHTML=`<div class="sheet"><div class="in"><h1>¿Cómo funciona?</h1><p><b>Hoy:</b> te dice qué toca ahora. Toca “Ver cómo se hace” y sigue los pasos.</p><p><b>✓:</b> cuando comas, pulsa el cuadrado verde. Después puedes decir cómo te sientes.</p><p><b>Semana:</b> ve qué comerás cada día.</p><p><b>Compra:</b> la lista ya está hecha. Marca lo que vayas metiendo al carro.</p><p><b>Sustituir:</b> si te falta un ingrediente, aquí te dice con qué cambiarlo.</p><p><b>Más:</b> letra más grande, alto contraste y tu peso.</p><button class="btn" data-act="close">Entendido</button></div></div>`}
+function sheetWeight(){$("#layer").innerHTML=`<div class="sheet"><div class="in"><h1>Apuntar mi peso</h1><input type="number" id="wkg" inputmode="decimal" step="0.1" placeholder="Ej.: 83,2"><div class="sub">Pésate una vez por semana, por la mañana y en ayunas.</div><button class="btn" data-act="wsave">Guardar</button><button class="btn alt" data-act="close">Cancelar</button></div></div>`}
+function sheetHist(){const rows=lastDays(10).map(k=>{const l=S.log[k];if(!l)return "";return `<div class="card"><b>${longDate(k)}</b><div class="sub">${Object.keys(l.done).length} comidas · ${l.water||0} vasos de agua${Object.keys(l.skip).length?" · "+Object.keys(l.skip).length+" saltadas":""}</div></div>`}).join("");$("#layer").innerHTML=`<div class="modal"><div class="in"><button class="btn alt small" data-act="close">← Volver</button><h1>Mi registro</h1>${rows}</div></div>`}
+function sheetPin(){$("#layer").innerHTML=`<div class="sheet"><div class="in"><h1>Panel de la familia</h1><div class="sub">Escribe el PIN (en la demo es 1234).</div><input type="text" id="pin" inputmode="numeric" maxlength="8" autocomplete="off"><button class="btn" data-act="pinok">Entrar</button><button class="btn alt" data-act="close">Cancelar</button></div></div>`}
+function toast(msg,fn){const t=document.createElement("div");t.className="toast";t.textContent=msg;t.onclick=()=>{t.remove();fn&&fn()};document.body.appendChild(t);setTimeout(()=>t.remove(),12000)}
+
+/* ---------- 13. EVENTOS ---------- */
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b||b.tagName==="SELECT"||b.type==="time"||b.type==="file"||b.type==="text")return;const a=b.dataset.act,D=b.dataset;const close=()=>{$("#layer").innerHTML=""};
+ const A={
+ nav(){view=D.v;supOpen=false;close();render()},close,
+ recipe(){openRecipe(D.d,D.s)},
+ done(){const l=dayLog(D.d);if(l.done[D.s]){delete l.done[D.s];save();close();render();return}delete l.skip[D.s];const n=new Date();l.done[D.s]={t:pad(n.getHours())+":"+pad(n.getMinutes()),energy:"bien",hunger:"normal",inc:[],note:""};save();render();openFeel(D.d,D.s)},
+ water(){const l=dayLog(today());l.water=Math.max(0,(l.water||0)+Number(D.n));save();render()},
+ wk(){editWeek=D.n==="0"?0:editWeek+Number(D.n);render()},shopwk(){shopWeek=Number(D.n);render()},
+ shopck(){S.shop[D.w][D.k]=b.checked;save();render()},
+ share(){const t=shopText();if(navigator.share)navigator.share({text:t}).catch(()=>{});else window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank")},
+ copy(){navigator.clipboard&&navigator.clipboard.writeText(shopText()).then(()=>toast("Lista copiada ✓"))},
+ pick(){subPick=D.k;render()},subfor(){close();subPick=D.k;view="sustituir";render()},
+ usesub(){S.subs[D.k]=D.a;save();render()},unsub(){delete S.subs[D.k];save();render()},
+ font(){S.settings.font=Math.min(4,Math.max(0,S.settings.font+Number(D.n)));save();render()},contrast(){S.settings.contrast=!S.settings.contrast;save();render()},
+ ics(){const u=URL.createObjectURL(new Blob([makeICS()],{type:"text/calendar"}));const x=document.createElement("a");x.href=u;x.download="recordatorios-mi-menu.ics";x.click();$("#layer").innerHTML=`<div class="sheet"><div class="in"><h1>Casi está</h1><p>1. Abre el archivo que se acaba de descargar.</p><p>2. Elige <b>Calendario</b> y pulsa <b>Añadir</b>.</p><p>Desde mañana el móvil te avisará a la hora de cada comida.</p><button class="btn" data-act="close">Entendido</button></div></div>`},
+ help:sheetHelp,weight:sheetWeight,hist:sheetHist,supgo(){sheetPin()},
+ pinok(){if($("#pin").value===S.settings.pin){supOpen=true;close();render()}else{toast("PIN incorrecto")}},supout(){supOpen=false;render()},
+ wsave(){const v=parseFloat(String($("#wkg").value).replace(",","."));if(v>30&&v<250){S.weights.push({date:today(),kg:Math.round(v*10)/10});save();close();toast("Peso guardado ✓");render()}},
+ fset(){const d=dayLog(feelCtx.k).done[feelCtx.s];d[D.f]=D.v;save();openFeel(feelCtx.k,feelCtx.s)},
+ finc(){const d=dayLog(feelCtx.k).done[feelCtx.s];d.inc=d.inc||[];const i=d.inc.indexOf(D.v);i<0?d.inc.push(D.v):d.inc.splice(i,1);save();openFeel(feelCtx.k,feelCtx.s)},
+ fsave(){const d=dayLog(feelCtx.k).done[feelCtx.s];d.note=$("#fnote").value;save();close();adapt();render();toast("¡Anotado! Gracias 😊")},
+ speak(){const r=planFor(D.d)[D.s];speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(r.name+". "+r.steps.map((s,i)=>"Paso "+(i+1)+". "+s).join(" "));u.lang="es-ES";u.rate=.9;speechSynthesis.speak(u)},
+ meals(){S.settings.meals=Number(D.n);save();render()},portion(){S.settings.portion=Math.min(1.2,Math.max(.8,Math.round((S.settings.portion+Number(D.n))*10)/10));save();render()},people(){S.settings.people=Math.min(8,Math.max(1,S.settings.people+Number(D.n)));save();render()},dif(){S.settings.maxDif=Number(D.n);save();render()},
+ excl(){const x=S.settings.excluded,i=x.indexOf(D.k);i<0?x.push(D.k):x.splice(i,1);save();render()},
+ resetplan(){S.overrides={};save();render()},
+ remind(){S.settings.remind.on=!S.settings.remind.on;if(S.settings.remind.on&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission();save();render()},
+ undo(){const a=S.adaptLog[Number(D.i)];if(a&&a.key!=="none"){S.settings[a.key]=a.prev;a.key="none";a.msg+=" (deshecho)";save();render()}},
+ cleardemo(){S.log={};S.weights=[];S.demo=false;save();render()},
+ export(){const u=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));const x=document.createElement("a");x.href=u;x.download="mi-menu-copia.json";x.click()},
+ reset(){if(confirm("¿Seguro que quieres borrar todo?")){localStorage.removeItem(KEY);load();supOpen=false;render()}}
+ };A[a]&&A[a]()});
+document.addEventListener("change",e=>{const t=e.target,a=t.dataset.act;if(!a)return;const D=t.dataset;
+ if(a==="override"){S.overrides[D.d]=S.overrides[D.d]||{};S.overrides[D.d][D.s]=t.value;save();render()}
+ else if(a==="time"){S.settings.times[D.s]=t.value;save()}
+ else if(a==="lead"){S.settings.remind.lead=Number(t.value);save()}
+ else if(a==="name"){S.settings.name=t.value;save()}
+ else if(a==="pin"){if(t.value.length>=4){S.settings.pin=t.value;save()}}
+ else if(a==="import"){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(j.settings){S=j;save();render()}}catch(_){toast("Archivo no válido")}};r.readAsText(f)}});
+
+/* ---------- 14. RECORDATORIOS (con la app abierta) ---------- */
+function checkReminders(){if(!S.settings.remind.on)return;const now=new Date(),k=today();const plan=planFor(k);
+ for(const s of Object.keys(plan)){const t=addMin(S.settings.times[s],-S.settings.remind.lead);const hm=pad(now.getHours())+":"+pad(now.getMinutes());const id="r"+k+s;
+  if(hm===t&&!sessionStorage.getItem(id)){sessionStorage.setItem(id,1);const msg=`${SLOTS[s].i} ${SLOTS[s].n}: ${plan[s].name}`;toast(msg,()=>openRecipe(k,s));try{navigator.vibrate&&navigator.vibrate([200,100,200]);if("Notification"in window&&Notification.permission==="granted")new Notification("Mi Menú",{body:msg})}catch(_){}}}}
+setInterval(checkReminders,20000);
+
+if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+load();adapt();render();
+</script>
+</body>
+</html>
